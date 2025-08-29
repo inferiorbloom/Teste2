@@ -1,0 +1,431 @@
+import customtkinter as ctk
+from tkinter.filedialog import askopenfilename, askopenfilenames
+import os
+import json
+import pandas as pd
+from PIL import Image
+
+
+# Configurações iniciais do customtkinter
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("dark-blue")
+
+# Carregando ícone
+icone_pasta = ctk.CTkImage(light_image=Image.open("icones/pasta.png"), size=(20, 20))
+icone_file = ctk.CTkImage(light_image=Image.open("icones/file.png"), size=(20, 20))
+icone_excel = ctk.CTkImage(light_image=Image.open("icones/excel.png"), size=(20, 20))
+icone_remover = ctk.CTkImage(light_image=Image.open("icones/remover.png"), size=(20, 20))
+icone_padrao = ctk.CTkImage(light_image=Image.open("icones/padrao.png"), size=(20, 20))
+icone_calcular = ctk.CTkImage(light_image=Image.open("icones/calcular.png"), size=(20, 20))
+icone_adicionar = ctk.CTkImage(light_image=Image.open("icones/adicionar.png"), size=(20, 20))
+
+# Variáveis globais
+arquivo_padrao = 0
+arquivos = ()
+padroes = {}
+padrao_escolhido = None
+if os.path.exists("padroes.json"):
+    with open("padroes.json", "r", encoding="utf-8") as f:
+        padroes = json.load(f)
+
+# Para habilitar o botão de calcular apenas quando os arquivos forem selecionados
+selecionado_arquivo_padrao = False
+selecionado_amostras = False
+selecionado_padrao = False
+def habilitar_calcular(selecionado_arquivo_padrao, selecionado_amostras, selecionado_padrao):
+    if selecionado_arquivo_padrao and selecionado_amostras and selecionado_padrao:
+        botao_calcular.configure(state="normal", command=calcular_concentracoes)
+
+
+
+
+def salvar_padroes():
+    with open("padroes.json", "w", encoding="utf-8") as f:
+        json.dump(padroes, f, ensure_ascii=False, indent=4)
+    print(padroes)
+
+def selecionar_arquivo_padrao():
+    global selecionado_arquivo_padrao
+    global arquivo_padrao
+    arquivo_padrao = askopenfilename(title="Selecione o arquivo.txt que deseja utilizar como PADRÃO!", filetypes=[("Arquivos de texto", "*.txt")])
+    texto_arquivo_padrao.configure(text=os.path.basename(arquivo_padrao))
+    selecionado_arquivo_padrao = True
+
+def selecionar_arquivos_amostras():
+    global arquivos
+    global selecionado_amostras
+    arquivos = askopenfilenames(title="Selecione os arquivos.txt que deseja utilizar como AMOSTRAS!", filetypes=[("Arquivos de texto", "*.txt")])
+    if arquivos:
+        ultimo = os.path.basename(arquivos[-1])
+        primeiro = os.path.basename(arquivos[0])
+        texto_arquivos_amostras.configure(text=f"{primeiro} ... {ultimo}")
+    else:
+        texto_arquivos_amostras.configure(text="Nenhum arquivo selecionado")
+    selecionado_amostras = True
+
+def adicionar_nomes_padrao():
+    global padroes
+    nome_padrao = caixa_de_texto.get()
+    if nome_padrao:
+        padroes[nome_padrao] = {}
+    print(padroes)
+    salvar_padroes()
+
+def adicionar_concentracoes_elementos():
+    lista_elementos = ctk.CTkToplevel(janela)
+    lista_elementos.title("Adicionar Concentrações dos Elementos")
+
+    escreva_elemento = ctk.CTkLabel(lista_elementos, text="Elemento (símbolo):")
+    escreva_elemento.grid(column=0, row=0, padx=10, pady=10)
+    caixa_elemento = ctk.CTkEntry(lista_elementos, width=120)
+    caixa_elemento.grid(column=0, row=1, padx=10, pady=10)
+
+    escreva_concentracao = ctk.CTkLabel(lista_elementos, text="Concentração (mg/kg):")
+    escreva_concentracao.grid(column=1, row=0, padx=10, pady=10)
+    caixa_concentracao = ctk.CTkEntry(lista_elementos, width=120)
+    caixa_concentracao.grid(column=1, row=1, padx=10, pady=10)
+
+    # Validação das caixas
+    def validar_letras(event):
+        valor = caixa_elemento.get()
+        if not valor.isalpha():
+            caixa_elemento.delete(0, "end")
+            caixa_elemento.insert(0, ''.join(filter(str.isalpha, valor)))
+
+    def validar_numeros(event):
+        valor = caixa_concentracao.get()
+        novo_valor = ''.join([c for c in valor if c.isdigit() or c == '.'])
+        if valor != novo_valor:
+            caixa_concentracao.delete(0, "end")
+            caixa_concentracao.insert(0, novo_valor)
+
+    caixa_elemento.bind("<KeyRelease>", validar_letras)
+    caixa_concentracao.bind("<KeyRelease>", validar_numeros)
+
+    def adicionar():
+        global padroes
+        elemento = caixa_elemento.get().strip()
+        try:
+            concentracao = float(caixa_concentracao.get().strip())
+            if elemento and concentracao:
+                if padroes:
+                    ultimo_padrao = list(padroes.keys())[-1]
+                    padroes[ultimo_padrao][elemento] = concentracao
+                    print(f"Adicionado {elemento}: {concentracao} mg/kg ao padrão {ultimo_padrao}")
+                    salvar_padroes()
+                else:
+                    print("Nenhum padrão adicionado. Adicione um padrão primeiro.")
+        except ValueError:
+            print("Concentração inválida. Por favor, insira um número.")
+        print(padroes)
+
+    botao_adicionar = ctk.CTkButton(lista_elementos, text="Adicionar", command=adicionar)
+    botao_adicionar.grid(column=0, row=5, columnspan=2, padx=10, pady=10, sticky="ew")
+
+def excluir_padrao():
+    lista_excluir = ctk.CTkToplevel(janela)
+    lista_excluir.title("Excluir Padrão")
+    escreva_excluir = ctk.CTkLabel(lista_excluir, text="Selecione o padrão que deseja excluir:")
+    escreva_excluir.grid(column=0, row=0, padx=10, pady=10)
+    lista_padroes = ctk.CTkComboBox(lista_excluir, values=list(padroes.keys()))
+    lista_padroes.grid(column=0, row=1, padx=10, pady=10)
+
+
+   # Centraliza na tela
+    lista_excluir.update_idletasks()
+    largura = lista_excluir.winfo_width()
+    altura = lista_excluir.winfo_height()
+    x = (lista_excluir.winfo_screenwidth() // 2) - (largura // 2)
+    y = (lista_excluir.winfo_screenheight() // 2) - (altura // 2)
+    lista_excluir.geometry(f"+{x}+{y}")
+
+
+
+
+
+
+    def confirmar_exclusao():
+        padrao_para_excluir = lista_padroes.get()
+        if padrao_para_excluir in padroes:
+            confirm = ctk.CTkToplevel(lista_excluir)
+            confirm.title("Confirmação")
+            texto_confirma = ctk.CTkLabel(confirm, text=f'Tem certeza que deseja excluir o padrão "{padrao_para_excluir}"?')
+            texto_confirma.grid(column=0, row=0, columnspan=2, padx=20, pady=20)
+
+            def sim():
+                global padroes
+                del padroes[padrao_para_excluir]
+                salvar_padroes()
+                print(f"Padrão {padrao_para_excluir} excluído.")
+                confirm.destroy()
+                lista_excluir.destroy()
+
+            def nao():
+                confirm.destroy()
+
+            botao_sim = ctk.CTkButton(confirm, text="Sim", command=sim)
+            botao_sim.grid(column=0, row=1, padx=10, pady=10)
+            botao_nao = ctk.CTkButton(confirm, text="Não", command=nao)
+            botao_nao.grid(column=1, row=1, padx=10, pady=10)
+
+    botao_excluir = ctk.CTkButton(lista_excluir, text="Excluir", command=confirmar_exclusao)
+    botao_excluir.grid(column=0, row=2, padx=10, pady=10)
+
+def escolher_padrao():
+    global padrao_escolhido
+    lista_escolher = ctk.CTkToplevel(janela)
+    lista_escolher.title("Escolher Padrão")
+    
+
+    # Centraliza na tela
+    lista_escolher.update_idletasks()
+    largura = lista_escolher.winfo_width()
+    altura = lista_escolher.winfo_height()
+    x = (lista_escolher.winfo_screenwidth() // 2) - (largura // 2)
+    y = (lista_escolher.winfo_screenheight() // 2) - (altura // 2)
+    lista_escolher.geometry(f"+{x}+{y}")
+
+    # Mantém em primeiro plano
+    lista_escolher.lift()
+    lista_escolher.attributes('-topmost', True)
+
+    lista_pd = ctk.CTkComboBox(lista_escolher, values=list(padroes.keys()))
+    lista_pd.grid(column=0, row=0, padx=10, pady=10)
+
+    def escolher():
+        global padrao_escolhido
+        global selecionado_padrao
+        padrao_escolhido = lista_pd.get()
+        print(f"Padrão escolhido: {padrao_escolhido}")
+        selecionado_padrao = True
+        habilitar_calcular(selecionado_arquivo_padrao, selecionado_amostras, selecionado_padrao)
+        texto_padraoselecionado.configure(text=f"Padrão escolhido: {padrao_escolhido}")
+        lista_escolher.destroy()
+
+    botao_escolher = ctk.CTkButton(lista_escolher, text="Escolher", command=escolher)
+    botao_escolher.grid(column=0, row=1, padx=10, pady=10)
+
+# Janela principal
+janela = ctk.CTk()
+janela.title("Cálculo de Concentrações")
+janela.geometry("700x700")
+
+# Frame central com margem
+frame = ctk.CTkFrame(janela, corner_radius=20)
+frame.pack(expand=True, fill="both", padx=40, pady=40)
+
+texto_orientacao = ctk.CTkLabel(frame, text="Selecione Amostra Padrão", font=("Arial Black", 18), wraplength=200)
+texto_orientacao.grid(column=0, row=0, padx=(30,10), pady=(40,10))
+botao_selecionar_padrao = ctk.CTkButton(frame, text="Selecionar Arquivo", command=selecionar_arquivo_padrao, image=icone_file, compound="left")
+botao_selecionar_padrao.grid(column=0, row=1, padx=(30,10), pady=10)
+texto_arquivo_padrao = ctk.CTkLabel(frame, text="")
+texto_arquivo_padrao.grid(column=0, row=2, padx=(30,10), pady=10)
+
+texto_orientacao2 = ctk.CTkLabel(frame, text="Selecione Dados para Calcular", font=("Arial Black", 18), wraplength=200)
+texto_orientacao2.grid(column=1, row=0, padx=(100,10), pady=(40,10))
+botao_selecionar_amostras = ctk.CTkButton(frame, text="Selecionar Arquivos", command=selecionar_arquivos_amostras, image=icone_pasta, compound="left")
+botao_selecionar_amostras.grid(column=1, row=1, padx=(100,10), pady=10)
+texto_arquivos_amostras = ctk.CTkLabel(frame, text="")
+texto_arquivos_amostras.grid(column=1, row=2, padx=(100,10), pady=10)
+
+texto_orientacao3 = ctk.CTkLabel(frame, text="Adicione Padrões Certificados", font=("Arial Black", 18), wraplength=200)
+texto_orientacao3.grid(column=0, row=3, padx=(30,10), pady=10)
+caixa_de_texto = ctk.CTkEntry(frame, width=250)
+caixa_de_texto.grid(column=0, row=4, padx=(30,10), pady=10)
+botao_adicionar_nome = ctk.CTkButton(frame, text="Adicionar", command=adicionar_nomes_padrao, image=icone_adicionar, compound="left")
+botao_adicionar_nome.grid(column=0, row=5, padx=(30,10), pady=10)
+espaco = ctk.CTkLabel(frame, text="")
+espaco.grid(column=0, row=6, padx=(30,10), pady=10)
+texto_orientacao6 = ctk.CTkLabel(frame, text="Escreva as Concentrações", font=("Arial Black", 18), wraplength=200)
+texto_orientacao6.grid(column=0, row=7, padx=(30,10), pady=10)
+botao_adicionar_concentracoes = ctk.CTkButton(frame, text="Escrever", command=adicionar_concentracoes_elementos, image=icone_adicionar, compound="left")
+botao_adicionar_concentracoes.grid(column=0, row=8, padx=(30,10), pady=10)
+botao_excluir_padrao = ctk.CTkButton(frame, text="Excluir Padrão", command=excluir_padrao, image=icone_remover, compound="left")
+botao_excluir_padrao.grid(column=0, row=9, padx=(30,10), pady=10)
+
+texto_orientacao4 = ctk.CTkLabel(frame, text="Utilizar o Padrão de:", font=("Arial Black", 18), wraplength=200)
+texto_orientacao4.grid(column=1, row=3, padx=(100,10), pady=10)
+botao_escolher_padrao = ctk.CTkButton(frame, text="Escolher Padrão", command=escolher_padrao, image=icone_padrao, compound="left")
+botao_escolher_padrao.grid(column=1, row=4, padx=(100,10), pady=10)
+texto_padraoselecionado = ctk.CTkLabel(frame, text="Padrão escolhido: Nenhum")
+texto_padraoselecionado.grid(column=1, row=5, padx=(100,10), pady=10)
+
+elementos = {
+    12: "Mg", 13: "Al", 14: "Si", 15: "P", 16: "S", 17: "Cl", 18: "Ar",
+    19: "K", 20: "Ca", 21: "Sc", 22: "Ti", 23: "V", 24: "Cr", 25: "Mn",
+    26: "Fe", 27: "Co", 28: "Ni", 29: "Cu", 30: "Zn", 31: "Ga", 32: "Ge",
+    33: "As", 34: "Se", 35: "Br", 36: "Kr", 37: "Rb", 38: "Sr", 39: "Y",
+    40: "Zr", 41: "Nb", 42: "Mo", 43: "Tc", 44: "Ru", 45: "Rh", 46: "Pd",
+    47: "Ag", 48: "Cd", 49: "In", 50: "Sn", 51: "Sb", 52: "Te", 53: "I",
+    54: "Xe", 55: "Cs", 56: "Ba", 57: "La", 58: "Ce", 59: "Pr", 60: "Nd",
+    61: "Pm", 62: "Sm", 63: "Eu", 64: "Gd", 65: "Tb", 66: "Dy", 67: "Ho",
+    68: "Er", 69: "Tm", 70: "Yb", 71: "Lu", 72: "Hf", 73: "Ta", 74: "W",
+    75: "Re", 76: "Os", 77: "Ir", 78: "Pt", 79: "Au", 80: "Hg", 81: "Tl",
+    82: "Pb", 83: "Bi", 84: "Po", 85: "At", 86: "Rn", 87: "Fr", 88: "Ra",
+    89: "Ac", 90: "Th", 91: "Pa", 92: "U", 93: "Np", 94: "Pu"
+}
+
+def habilitar_exportar():
+    botao_exportar.configure(state="normal", command=exportar_para_excel)
+
+def calcular_concentracoes():
+    global padrao_escolhido, arquivos, arquivo_padrao, padroes, concentracoes
+
+    if not padrao_escolhido:
+        print("Nenhum padrão escolhido!")
+        return
+
+    c_padrao = padroes.get(padrao_escolhido, {})
+    area_padrao = {}
+    documentos = {}
+    concentracoes = {}
+
+    for i, arquivo in enumerate(arquivos, start=1):
+        documentos[f"documento{i}"] = {"caminho": arquivo}
+        nome_amostra = os.path.basename(arquivo).replace(".txt", "")
+        concentracoes[f"concentracao{i}"] = {nome_amostra: {}}
+
+    for doc in documentos.values():
+        with open(doc["caminho"], "r", encoding="utf-8") as f:
+            conteudo = f.readlines()[5:]
+        doc["linhas"] = [ [float(x.strip()) for x in linha.split(",")] for linha in conteudo ]
+
+
+
+
+
+        # Lê área do padrão
+    with open(arquivo_padrao, "r", encoding="utf-8") as p:
+        for line in p:
+            line = line.strip()
+            if line and line[0].isdigit():
+                valores = [v.strip() for v in line.split(",")]
+                try:
+                    z = int(valores[0])
+                    area = float(valores[2])
+                    elemento = elementos.get(z, "-")
+                    area_padrao[elemento] = area
+                except:
+                    continue
+
+
+
+# Normalização
+    area_ar_padrao = area_padrao.get("Ar", None)
+    fatores_normalizacao = {}
+    for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
+        nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
+        area_ar_amostra = None
+        for linha in info["linhas"]:
+            if int(linha[0]) == 18:  # Z do Ar
+                area_ar_amostra = linha[2]
+                break
+        if area_ar_amostra and area_ar_padrao:
+            fatores_normalizacao[nome_amostra] = area_ar_padrao / area_ar_amostra
+
+
+
+
+
+    # Cálculo das concentrações
+    for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
+        nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
+        fator = fatores_normalizacao.get(nome_amostra, 1)  # usa 1 se não houver fator (sem normalização)
+        for linha in info["linhas"]:
+            num = int(linha[0])
+            area_net = linha[2]
+            elemento = elementos.get(num)
+
+            # Aplica normalização na área antes do cálculo
+            area_net_normalizada = area_net * fator
+
+            if elemento in c_padrao and elemento in area_padrao:
+                conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
+                concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
+
+    for chave, dados in concentracoes.items():
+        print(f"--- {chave} ---")
+        for amostra, valores in dados.items():
+            print(f"{amostra}: {valores}")
+    habilitar_exportar()
+
+botao_calcular = ctk.CTkButton(frame, text="Calcular Concentrações", state="disabled", command=calcular_concentracoes, image=icone_calcular, compound="left")
+botao_calcular.grid(column=1, row=7, padx=(100,10), pady=10)
+
+
+
+def exportar_para_excel():
+    global arquivos, concentracoes
+
+    # --- Exportação dos dados originais (sem mudar nada) ---
+    todos_dados = []
+    for arquivo in arquivos:
+        nome_amostra = os.path.basename(arquivo).replace(".txt", "")
+        todos_dados.append([nome_amostra, "", "", "", ""])
+        todos_dados.append(["Elemento", "Z", "Energia", "Área", "Erro"])
+        with open(arquivo, "r", encoding="utf-8") as f:
+            linhas = f.readlines()[5:]
+            for linha in linhas:
+                valores = [v.strip() for v in linha.split(",")]
+                if len(valores) > 1:
+                    try:
+                        z = valores[0]
+                        nome_elemento = elementos.get(int(z), "")
+                    except:
+                        nome_elemento = ""
+                    dados_sem_ultima = valores[:-1]
+                    linha_export = [nome_elemento] + dados_sem_ultima
+                    todos_dados.append(linha_export)
+        todos_dados.append(["", "", "", "", ""])
+
+    df_dados = pd.DataFrame(todos_dados, columns=["Elemento", "Z", "Energia", "Área", "Erro"])
+
+    # --- Exportação da análise (concentrações já calculadas) ---
+    # Agora só usa o dicionário `concentracoes` que já foi gerado antes
+    analise = {}
+    for chave, dados in concentracoes.items():
+        for amostra, valores in dados.items():
+            analise[amostra] = valores
+
+    elementos_encontrados = sorted({el for amostra in analise.values() for el in amostra.keys()})
+    df_analise = pd.DataFrame([
+        [analise[amostra].get(el, "") for el in elementos_encontrados]
+        for amostra in analise.keys()
+    ], index=list(analise.keys()), columns=elementos_encontrados)
+
+    # Exporta para Excel com duas abas
+    with pd.ExcelWriter("amostras.xlsx") as writer:
+        df_dados.to_excel(writer, sheet_name="Dados", index=False)
+        df_analise.to_excel(writer, sheet_name="Análise", index=True)
+
+    # Pop-up de confirmação
+    exportado = ctk.CTkToplevel()
+    exportado.title("Exportação Concluída")
+    texto_exportado = ctk.CTkLabel(
+        exportado,
+        text="Arquivo exportado com sucesso como 'amostras.xlsx'!",
+        font=("Arial Black", 16)
+    )
+    texto_exportado.pack(padx=20, pady=20)
+    exportado.update_idletasks()
+    largura = exportado.winfo_width()
+    altura = exportado.winfo_height()
+    x = (exportado.winfo_screenwidth() // 2) - (largura // 2)
+    y = (exportado.winfo_screenheight() // 2) - (altura // 2)
+    exportado.geometry(f"+{x}+{y}")
+
+    print("Exportação concluída!")
+
+
+
+botao_exportar = ctk.CTkButton(frame, text="Exportar para Excel", state="disabled", command=exportar_para_excel, image=icone_excel, compound="left")
+botao_exportar.grid(column=1, row=8, padx=(100,10), pady=10)
+
+
+
+
+
+janela.mainloop()
+
+
+
