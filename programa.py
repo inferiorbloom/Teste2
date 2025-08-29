@@ -66,14 +66,27 @@ def selecionar_arquivos_amostras():
 def adicionar_nomes_padrao():
     global padroes
     nome_padrao = caixa_de_texto.get()
+    caixa_de_texto.delete(0, ctk.END)
+
     if nome_padrao:
         padroes[nome_padrao] = {}
     print(padroes)
     salvar_padroes()
 
 def adicionar_concentracoes_elementos():
-    lista_elementos = ctk.CTkToplevel(janela)
+    lista_elementos = ctk.CTkToplevel(gerenciador)
     lista_elementos.title("Adicionar Concentrações dos Elementos")
+    lista_elementos.transient(gerenciador)  # Torna a janela filha da janela principal
+    lista_elementos.grab_set()  # Impede interação com a janela principal enquanto esta está aberta
+
+    # Centraliza na tela
+    lista_elementos.update_idletasks()
+    largura = lista_elementos.winfo_width()
+    altura = lista_elementos.winfo_height()
+    x = (lista_elementos.winfo_screenwidth() // 2) - (largura // 2)
+    y = (lista_elementos.winfo_screenheight() // 2) - (altura // 2)
+    lista_elementos.geometry(f"+{x}+{y}")
+
 
     escreva_elemento = ctk.CTkLabel(lista_elementos, text="Elemento (símbolo):")
     escreva_elemento.grid(column=0, row=0, padx=10, pady=10)
@@ -105,8 +118,10 @@ def adicionar_concentracoes_elementos():
     def adicionar():
         global padroes
         elemento = caixa_elemento.get().strip()
+        caixa_elemento.delete(0, ctk.END)
         try:
             concentracao = float(caixa_concentracao.get().strip())
+            caixa_concentracao.delete(0, ctk.END)
             if elemento and concentracao:
                 if padroes:
                     ultimo_padrao = list(padroes.keys())[-1]
@@ -129,6 +144,8 @@ def excluir_padrao():
     escreva_excluir.grid(column=0, row=0, padx=10, pady=10)
     lista_padroes = ctk.CTkComboBox(lista_excluir, values=list(padroes.keys()))
     lista_padroes.grid(column=0, row=1, padx=10, pady=10)
+    lista_excluir.transient(janela)  # Torna a janela filha da janela principal
+    lista_excluir.grab_set()  # Impede interação com a janela principal enquanto esta está aberta
 
 
    # Centraliza na tela
@@ -138,16 +155,16 @@ def excluir_padrao():
     x = (lista_excluir.winfo_screenwidth() // 2) - (largura // 2)
     y = (lista_excluir.winfo_screenheight() // 2) - (altura // 2)
     lista_excluir.geometry(f"+{x}+{y}")
-
-
-
-
+    lista_excluir.attributes("-topmost", False)
 
 
     def confirmar_exclusao():
         padrao_para_excluir = lista_padroes.get()
+        
         if padrao_para_excluir in padroes:
             confirm = ctk.CTkToplevel(lista_excluir)
+            confirm.transient(lista_excluir)  # Torna a janela filha da janela principal
+            confirm.grab_set()  # Impede interação com a janela principal enquanto esta está aberta
             confirm.title("Confirmação")
             texto_confirma = ctk.CTkLabel(confirm, text=f'Tem certeza que deseja excluir o padrão "{padrao_para_excluir}"?')
             texto_confirma.grid(column=0, row=0, columnspan=2, padx=20, pady=20)
@@ -175,7 +192,8 @@ def escolher_padrao():
     global padrao_escolhido
     lista_escolher = ctk.CTkToplevel(janela)
     lista_escolher.title("Escolher Padrão")
-    
+    lista_escolher.transient(janela)  # Torna a janela filha da janela principal
+    lista_escolher.grab_set()  # Impede interação com a janela principal enquanto esta está aberta
 
     # Centraliza na tela
     lista_escolher.update_idletasks()
@@ -208,6 +226,7 @@ def escolher_padrao():
 # Janela principal
 janela = ctk.CTk(fg_color="#1E1E1E")
 janela.title("Cálculo de Concentrações")
+janela.attributes("-topmost", False)
 largura = 647
 altura = 700
 x = (janela.winfo_screenwidth() // 2) - (largura // 2)
@@ -247,24 +266,39 @@ texto_arquivos_amostras.grid(column=1, row=3, padx=10, pady=10, sticky="n")
 
 
 def gerenciar_padroes():
-    global caixa_de_texto
+    global caixa_de_texto, gerenciador
 
     gerenciador = ctk.CTkToplevel(janela)
     gerenciador.title("Gerenciar Padrões")
+    gerenciador.transient(janela)  # Torna a janela filha da janela principal
+    gerenciador.grab_set()  # Impede interação com a janela principal enquanto esta está aberta
+    l = 300
+    a = 400
+    
+   # Centraliza na tela
+    gerenciador.update_idletasks()
+    largura = gerenciador.winfo_width()
+    altura = gerenciador.winfo_height()
+    x = (gerenciador.winfo_screenwidth() // 2) - (l // 2)
+    y = (gerenciador.winfo_screenheight() // 2) - (a // 2)
+    gerenciador.geometry(f"+{x}+{y}")
+
+
 
     texto_orientacao3 = ctk.CTkLabel(gerenciador, text="Adicione Padrões Certificados", font=("Arial Black", 18), wraplength=200)#texto_orientacao3.grid(column=0, row=3, padx=(30,10), pady=10)
+    texto_orientacao3.grid(column=0, row=1, padx=10, pady=10)
     caixa_de_texto = ctk.CTkEntry(gerenciador, width=250)
-    caixa_de_texto.grid(column=0, row=4, padx=(30,10), pady=10)
+    caixa_de_texto.grid(column=0, row=2, padx=10, pady=10)
     botao_adicionar_nome = ctk.CTkButton(gerenciador, text="Adicionar", command=adicionar_nomes_padrao, image=icone_adicionar, compound="left")
-    botao_adicionar_nome.grid(column=0, row=5, padx=(30,10), pady=10)
+    botao_adicionar_nome.grid(column=0, row=3, padx=10, pady=10)
     espaco = ctk.CTkLabel(gerenciador, text="")
-    espaco.grid(column=0, row=6, padx=(30,10), pady=10)
+    espaco.grid(column=0, row=4, padx=10, pady=10)
     texto_orientacao6 = ctk.CTkLabel(gerenciador, text="Escreva as Concentrações", font=("Arial Black", 18), wraplength=200)
-    texto_orientacao6.grid(column=0, row=7, padx=(30,10), pady=10)
+    texto_orientacao6.grid(column=0, row=5, padx=10, pady=10)
     botao_adicionar_concentracoes = ctk.CTkButton(gerenciador, text="Escrever", command=adicionar_concentracoes_elementos, image=icone_adicionar, compound="left")
-    botao_adicionar_concentracoes.grid(column=0, row=8, padx=(30,10), pady=10)
+    botao_adicionar_concentracoes.grid(column=0, row=6, padx=10, pady=10)
     botao_excluir_padrao = ctk.CTkButton(gerenciador, text="Excluir Padrão", command=excluir_padrao, image=icone_remover, compound="left")
-    botao_excluir_padrao.grid(column=0, row=9, padx=(30,10), pady=10)
+    botao_excluir_padrao.grid(column=0, row=9, padx=7, pady=10)
 
 # Frame de cima dentro do frame central
 frame_meio = ctk.CTkFrame(frame, fg_color="transparent", border_color="#D87878", border_width=2, corner_radius=20)
