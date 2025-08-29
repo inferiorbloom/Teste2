@@ -206,49 +206,89 @@ def escolher_padrao():
     botao_escolher.grid(column=0, row=1, padx=10, pady=10)
 
 # Janela principal
-janela = ctk.CTk()
+janela = ctk.CTk(fg_color="#1E1E1E")
 janela.title("Cálculo de Concentrações")
-janela.geometry("700x700")
+largura = 647
+altura = 700
+x = (janela.winfo_screenwidth() // 2) - (largura // 2)
+y = (janela.winfo_screenheight() // 2) - (altura // 2)
+janela.geometry(f"{largura}x{altura}+{x}+{y}")
+
 
 # Frame central com margem
 frame = ctk.CTkFrame(janela, corner_radius=20)
 frame.pack(expand=True, fill="both", padx=40, pady=40)
 
-texto_orientacao = ctk.CTkLabel(frame, text="Selecione Amostra Padrão", font=("Arial Black", 18), wraplength=200)
-texto_orientacao.grid(column=0, row=0, padx=(30,10), pady=(40,10))
-botao_selecionar_padrao = ctk.CTkButton(frame, text="Selecionar Arquivo", command=selecionar_arquivo_padrao, image=icone_file, compound="left")
-botao_selecionar_padrao.grid(column=0, row=1, padx=(30,10), pady=10)
-texto_arquivo_padrao = ctk.CTkLabel(frame, text="")
-texto_arquivo_padrao.grid(column=0, row=2, padx=(30,10), pady=10)
+# Frame de cima dentro do frame central
+frame_cima = ctk.CTkFrame(frame, fg_color="transparent", border_color="#56A4D8", border_width=2, corner_radius=20)
+frame_cima.grid(row=0, column=0, columnspan=2, stick="ew", padx=10, pady=10)
 
-texto_orientacao2 = ctk.CTkLabel(frame, text="Selecione Dados para Calcular", font=("Arial Black", 18), wraplength=200)
-texto_orientacao2.grid(column=1, row=0, padx=(100,10), pady=(40,10))
-botao_selecionar_amostras = ctk.CTkButton(frame, text="Selecionar Arquivos", command=selecionar_arquivos_amostras, image=icone_pasta, compound="left")
-botao_selecionar_amostras.grid(column=1, row=1, padx=(100,10), pady=10)
-texto_arquivos_amostras = ctk.CTkLabel(frame, text="")
-texto_arquivos_amostras.grid(column=1, row=2, padx=(100,10), pady=10)
+# Título
+titulo = ctk.CTkLabel(frame_cima, text="Cálculo de Concentrações", font=("Arial Black", 24))
+titulo.grid(row=0, column=0, padx=10, pady=10, sticky="ew", columnspan=2)
+# Faz as colunas ocuparem espaço proporcional
+frame_cima.grid_columnconfigure(0, weight=1)
+frame_cima.grid_columnconfigure(1, weight=1)
 
-texto_orientacao3 = ctk.CTkLabel(frame, text="Adicione Padrões Certificados", font=("Arial Black", 18), wraplength=200)
-texto_orientacao3.grid(column=0, row=3, padx=(30,10), pady=10)
-caixa_de_texto = ctk.CTkEntry(frame, width=250)
-caixa_de_texto.grid(column=0, row=4, padx=(30,10), pady=10)
-botao_adicionar_nome = ctk.CTkButton(frame, text="Adicionar", command=adicionar_nomes_padrao, image=icone_adicionar, compound="left")
-botao_adicionar_nome.grid(column=0, row=5, padx=(30,10), pady=10)
-espaco = ctk.CTkLabel(frame, text="")
-espaco.grid(column=0, row=6, padx=(30,10), pady=10)
-texto_orientacao6 = ctk.CTkLabel(frame, text="Escreva as Concentrações", font=("Arial Black", 18), wraplength=200)
-texto_orientacao6.grid(column=0, row=7, padx=(30,10), pady=10)
-botao_adicionar_concentracoes = ctk.CTkButton(frame, text="Escrever", command=adicionar_concentracoes_elementos, image=icone_adicionar, compound="left")
-botao_adicionar_concentracoes.grid(column=0, row=8, padx=(30,10), pady=10)
-botao_excluir_padrao = ctk.CTkButton(frame, text="Excluir Padrão", command=excluir_padrao, image=icone_remover, compound="left")
-botao_excluir_padrao.grid(column=0, row=9, padx=(30,10), pady=10)
+texto_orientacao = ctk.CTkLabel(frame_cima, text="Selecione Amostra Padrão", font=("Arial Black", 18), wraplength=200)
+texto_orientacao.grid(column=0, row=1, padx=10, pady=10, sticky="n")
+botao_selecionar_padrao = ctk.CTkButton(frame_cima, text="Selecionar Arquivo", command=selecionar_arquivo_padrao, image=icone_file, compound="left")
+botao_selecionar_padrao.grid(column=0, row=2, padx=10, pady=10, sticky="n")
+texto_arquivo_padrao = ctk.CTkLabel(frame_cima, text="")
+texto_arquivo_padrao.grid(column=0, row=3, padx=10, pady=10)
 
-texto_orientacao4 = ctk.CTkLabel(frame, text="Utilizar o Padrão de:", font=("Arial Black", 18), wraplength=200)
-texto_orientacao4.grid(column=1, row=3, padx=(100,10), pady=10)
-botao_escolher_padrao = ctk.CTkButton(frame, text="Escolher Padrão", command=escolher_padrao, image=icone_padrao, compound="left")
-botao_escolher_padrao.grid(column=1, row=4, padx=(100,10), pady=10)
-texto_padraoselecionado = ctk.CTkLabel(frame, text="Padrão escolhido: Nenhum")
-texto_padraoselecionado.grid(column=1, row=5, padx=(100,10), pady=10)
+texto_orientacao2 = ctk.CTkLabel(frame_cima, text="Selecione Dados para Calcular", font=("Arial Black", 18), wraplength=200)
+texto_orientacao2.grid(column=1, row=1, padx=10, pady=10, sticky="n")
+botao_selecionar_amostras = ctk.CTkButton(frame_cima, text="Selecionar Arquivos", command=selecionar_arquivos_amostras, image=icone_pasta, compound="left")
+botao_selecionar_amostras.grid(column=1, row=2, padx=10, pady=10, sticky="n")
+texto_arquivos_amostras = ctk.CTkLabel(frame_cima, text="")
+texto_arquivos_amostras.grid(column=1, row=3, padx=10, pady=10, sticky="n")
+
+
+
+def gerenciar_padroes():
+    global caixa_de_texto
+
+    gerenciador = ctk.CTkToplevel(janela)
+    gerenciador.title("Gerenciar Padrões")
+
+    texto_orientacao3 = ctk.CTkLabel(gerenciador, text="Adicione Padrões Certificados", font=("Arial Black", 18), wraplength=200)#texto_orientacao3.grid(column=0, row=3, padx=(30,10), pady=10)
+    caixa_de_texto = ctk.CTkEntry(gerenciador, width=250)
+    caixa_de_texto.grid(column=0, row=4, padx=(30,10), pady=10)
+    botao_adicionar_nome = ctk.CTkButton(gerenciador, text="Adicionar", command=adicionar_nomes_padrao, image=icone_adicionar, compound="left")
+    botao_adicionar_nome.grid(column=0, row=5, padx=(30,10), pady=10)
+    espaco = ctk.CTkLabel(gerenciador, text="")
+    espaco.grid(column=0, row=6, padx=(30,10), pady=10)
+    texto_orientacao6 = ctk.CTkLabel(gerenciador, text="Escreva as Concentrações", font=("Arial Black", 18), wraplength=200)
+    texto_orientacao6.grid(column=0, row=7, padx=(30,10), pady=10)
+    botao_adicionar_concentracoes = ctk.CTkButton(gerenciador, text="Escrever", command=adicionar_concentracoes_elementos, image=icone_adicionar, compound="left")
+    botao_adicionar_concentracoes.grid(column=0, row=8, padx=(30,10), pady=10)
+    botao_excluir_padrao = ctk.CTkButton(gerenciador, text="Excluir Padrão", command=excluir_padrao, image=icone_remover, compound="left")
+    botao_excluir_padrao.grid(column=0, row=9, padx=(30,10), pady=10)
+
+# Frame de cima dentro do frame central
+frame_meio = ctk.CTkFrame(frame, fg_color="transparent", border_color="#D87878", border_width=2, corner_radius=20)
+frame_meio.grid(row=2, column=0, columnspan=2, stick="ew", padx=10, pady=10)
+
+# Título
+titulo = ctk.CTkLabel(frame_meio, text="Controle dos Padrões", font=("Arial Black", 24))
+titulo.grid(row=0, column=0, padx=10, pady=10, sticky="ew", columnspan=2)
+# Faz as colunas ocuparem espaço proporcional
+frame_meio.grid_columnconfigure(0, weight=1)
+frame_meio.grid_columnconfigure(1, weight=1)
+
+
+texto_orientacao7 = ctk.CTkLabel(frame_meio, text="Adicione e Remova Padrões", font=("Arial Black", 18), wraplength=200)
+texto_orientacao7.grid(column=0, row=1, padx=40, pady=10, columnspan=1, sticky="n")
+botao_gerenciar_padrao = ctk.CTkButton(frame_meio, text="Gerenciar Padrões", command=gerenciar_padroes)
+botao_gerenciar_padrao.grid(column=0, row=2, padx=40, pady=10, sticky="n")
+
+texto_orientacao4 = ctk.CTkLabel(frame_meio, text="Utilizar o Padrão de:", font=("Arial Black", 18), wraplength=200)
+texto_orientacao4.grid(column=1, row=1, padx=40, pady=10, sticky="n")
+botao_escolher_padrao = ctk.CTkButton(frame_meio, text="Escolher Padrão", command=escolher_padrao, image=icone_padrao, compound="left")
+botao_escolher_padrao.grid(column=1, row=2, padx=40, pady=10, sticky="n")
+texto_padraoselecionado = ctk.CTkLabel(frame_meio, text="Padrão escolhido: Nenhum")
+texto_padraoselecionado.grid(column=1, row=3, padx=40, pady=10, sticky="n")
 
 elementos = {
     12: "Mg", 13: "Al", 14: "Si", 15: "P", 16: "S", 17: "Cl", 18: "Ar",
