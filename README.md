@@ -1,3 +1,3 @@
 AAAAAA
 
-![A](,/imagens/imagem.png)
+![A](Teste2/imagens/imagem.png)
