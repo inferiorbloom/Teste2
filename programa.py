@@ -525,7 +525,7 @@ def exportar_para_excel():
     ], index=list(analise.keys()), columns=elementos_encontrados)
 
     # Exporta para Excel com duas abas
-    with pd.ExcelWriter("amostras.xlsx") as writer:
+    with pd.ExcelWriter("tabela-excel/amostras.xlsx") as writer:
         df_dados.to_excel(writer, sheet_name="Dados", index=False)
         df_analise.to_excel(writer, sheet_name="Análise", index=True)
 
@@ -553,7 +553,7 @@ def exportar_para_excel():
 
 # Botão de exportar dentro do frame inferior direito
 botao_exportar = ctk.CTkButton(frame_inferior_direita, text="Exportar para Excel", state="disabled", command=exportar_para_excel, image=icone_excel, compound="left")
-botao_exportar.grid(column=0, row=2, padx=30, pady=10)
+botao_exportar.grid(column=0, row=2, padx=10, pady=10)
 
 
 janela.mainloop()
