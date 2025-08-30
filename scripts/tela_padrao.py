@@ -7,12 +7,13 @@ import json
 arquivo_padrao = 0
 arquivos = ()
 padroes = {}
-if os.path.exists("padroes.json"):
-    with open("padroes.json", "r", encoding="utf-8") as f:
+path = r'padroes/padroes.json'
+if os.path.exists(path):
+    with open(path, "r", encoding="utf-8") as f:
         padroes = json.load(f)
 #função para salvar padrões
 def salvar_padroes():
-    with open("padroes.json", "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(padroes, f, ensure_ascii=False, indent=4)
 print(padroes)  # Apenas para verificar se está funcionando
 #________________________________________________________________________________________________________________________________________________________________

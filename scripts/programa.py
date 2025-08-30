@@ -12,21 +12,22 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 #_____________________________________________________________________________________________________________________________________________________________________________________
 # Carregando ícone
-icone_pasta = ctk.CTkImage(light_image=Image.open("icones/pasta.png"), size=(20, 20))
-icone_file = ctk.CTkImage(light_image=Image.open("icones/file.png"), size=(20, 20))
-icone_excel = ctk.CTkImage(light_image=Image.open("icones/excel.png"), size=(20, 20))
-icone_remover = ctk.CTkImage(light_image=Image.open("icones/remover.png"), size=(20, 20))
-icone_padrao = ctk.CTkImage(light_image=Image.open("icones/padrao.png"), size=(20, 20))
-icone_calcular = ctk.CTkImage(light_image=Image.open("icones/calcular.png"), size=(20, 20))
-icone_adicionar = ctk.CTkImage(light_image=Image.open("icones/adicionar.png"), size=(20, 20))
+icone_pasta = ctk.CTkImage(light_image=Image.open("imagens/icones/pasta.png"), size=(20, 20))
+icone_file = ctk.CTkImage(light_image=Image.open("imagens/icones/file.png"), size=(20, 20))
+icone_excel = ctk.CTkImage(light_image=Image.open("imagens/icones/excel.png"), size=(20, 20))
+icone_remover = ctk.CTkImage(light_image=Image.open("imagens/icones/remover.png"), size=(20, 20))
+icone_padrao = ctk.CTkImage(light_image=Image.open("imagens/icones/padrao.png"), size=(20, 20))
+icone_calcular = ctk.CTkImage(light_image=Image.open("imagens/icones/calcular.png"), size=(20, 20))
+icone_adicionar = ctk.CTkImage(light_image=Image.open("imagens/icones/adicionar.png"), size=(20, 20))
 #_____________________________________________________________________________________________________________________________________________________________________________________
 # Variáveis globais
 arquivo_padrao = 0
 arquivos = ()
 padroes = {}
 padrao_escolhido = None
-if os.path.exists("padroes.json"):
-    with open("padroes.json", "r", encoding="utf-8") as f:
+path = r'padroes/padroes.json'
+if os.path.exists(path):
+    with open(path, "r", encoding="utf-8") as f:
         padroes = json.load(f)
 #_____________________________________________________________________________________________________________________________________________________________________________________
 # Para habilitar o botão de calcular apenas quando os arquivos forem selecionados
@@ -49,7 +50,7 @@ def som_atencao():
 #_____________________________________________________________________________________________________________________________________________________________________________________
 # Função para salvar padrões no arquivo JSON
 def salvar_padroes():
-    with open("padroes.json", "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(padroes, f, ensure_ascii=False, indent=4)
     print(padroes)
 #_____________________________________________________________________________________________________________________________________________________________________________________
