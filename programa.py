@@ -6,6 +6,10 @@ import pandas as pd
 from PIL import Image
 import winsound
 
+import churros
+
+churros.play_sound()
+
 #importações necessárias
 #_____________________________________________________________________________________________________________________________________________________________________________________
 # Configurações iniciais do customtkinter
