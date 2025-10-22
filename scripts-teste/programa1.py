@@ -6,6 +6,9 @@ import pandas as pd
 from PIL import Image
 import winsound
 
+
+
+
 #importações necessárias
 #_____________________________________________________________________________________________________________________________________________________________________________________
 # Configurações iniciais do customtkinter
