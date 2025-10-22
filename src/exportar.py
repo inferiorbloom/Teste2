@@ -1,6 +1,9 @@
+"""
+Modulos de carregamento de arquivos e bibliotecas
+"""
+import os
 import pandas as pd
 import customtkinter as ctk
-import os
 from calculos import elementos
 from utils import som_concluido
 from ui_config import janela

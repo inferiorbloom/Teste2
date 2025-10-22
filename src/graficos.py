@@ -1,12 +1,13 @@
+"""
+Modulos de carregamento de arquivos e bibliotecas
+"""
+import os
 import customtkinter as ctk
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
-import os
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from ui_config import janela
 from padroes import arquivos
 from calculos import concentracoes
-import numpy as np
 
 def config_graficos():
     config_graficos = ctk.CTkToplevel(janela)

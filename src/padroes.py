@@ -1,10 +1,13 @@
-import json, os
+"""
+Modulos de carregamento de arquivos e bibliotecas
+"""
+import os
+import json
 from tkinter.filedialog import askopenfilename, askopenfilenames
 import customtkinter as ctk
 from ui_config import texto_arquivo_padrao, texto_arquivos_amostras, texto_padraoselecionado, botao_calcular, janela, icone_adicionar, icone_remover
 from utils import som_atencao
 from calculos import calcular_concentracoes
-import json
 
 arquivo_padrao = 0
 path = "padroes/padroes.json"
@@ -142,7 +145,6 @@ def excluir_padrao():
 
     def confirmar_exclusao():
         padrao_para_excluir = lista_padroes.get()
-        
         if padrao_para_excluir in padroes:
             confirm = ctk.CTkToplevel(lista_excluir)
             confirm.transient(lista_excluir)  # Torna a janela filha da janela principal
@@ -215,7 +217,6 @@ def gerenciar_padroes():
     gerenciador.grab_set()  # Impede interação com a janela principal enquanto esta está aberta
     l = 300
     a = 400
-    
    # Centraliza na tela
     gerenciador.update_idletasks()
     largura = gerenciador.winfo_width()

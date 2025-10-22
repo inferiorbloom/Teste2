@@ -1,3 +1,6 @@
+"""
+Modulos de carregamento de arquivos e bibliotecas
+"""
 import customtkinter as ctk
 from PIL import Image
 from padroes import selecionar_arquivo_padrao, selecionar_arquivos_amostras, escolher_padrao, gerenciar_padroes

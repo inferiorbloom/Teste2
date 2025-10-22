@@ -1,5 +1,7 @@
+"""
+Modulos de carregamento de arquivos e bibliotecas
+"""
 import os
-import pandas as pd
 from padroes import padroes, arquivos
 from ui_config import botao_exportar
 from exportar import exportar_para_excel
@@ -21,6 +23,7 @@ elementos = {
 
 def habilitar_exportar():
     botao_exportar.configure(state="normal", command=exportar_para_excel)
+    return botao_exportar
 
 def calcular_concentracoes():
     global padrao_escolhido, arquivos, arquivo_padrao, padroes, concentracoes
@@ -84,6 +87,8 @@ def calcular_concentracoes():
             if elemento in c_padrao and elemento in area_padrao:
                 conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
                 concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
+                
+    return padrao_escolhido, arquivos, arquivo_padrao, padroes, concentracoes
 
 for chave, dados in concentracoes.items():
     print(f"--- {chave} ---")
