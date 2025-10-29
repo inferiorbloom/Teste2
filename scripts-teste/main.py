@@ -58,7 +58,7 @@ with open(arquivo_padrao, "r") as p:
                 elemento = elementos.get(z, "-")
                 area_padrao[elemento] = area
                 
-            except:
+            except(ValueError, IndexError):
                 continue
 #_________________________________________________________________________________________________________________________
 # NORMALIZAÇÃO

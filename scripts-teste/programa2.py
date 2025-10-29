@@ -662,11 +662,4 @@ def exportar_para_excel():
 botao_exportar = ctk.CTkButton(frame_inferior_direita, text="Exportar para Excel", state="disabled", command=exportar_para_excel, image=icone_excel, compound="left")
 botao_exportar.grid(column=0, row=2, padx=10, pady=10)
 
-
-
-
-
 janela.mainloop()
-
-
-
