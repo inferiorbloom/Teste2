@@ -13,7 +13,7 @@ class ConcentrationApp(ctk.CTk):
 
         self.title("🧪 Calculadora de Concentrações")
         self.geometry("1200x700")
-        self.resizable(False, False)
+        self.resizable(True, True)
 
         # --- VARIÁVEIS ---
         self.data_file = None
