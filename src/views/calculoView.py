@@ -9,9 +9,8 @@ class CalculoView(ctk.CTkFrame):
         icone_pasta = ctk.CTkImage(light_image=Image.open("imagens/icones/pasta.png"), size=(20, 20))
         icone_file = ctk.CTkImage(light_image=Image.open("imagens/icones/file.png"), size=(20, 20))
         icone_calcular = ctk.CTkImage(light_image=Image.open("imagens/icones/calcular.png"), size=(20, 20))
-        icone_padrao = ctk.CTkImage(light_image=Image.open("imagens/icones/padrao.png"), size=(20, 20))
 
-        self.selecionar_arquivo_padrao = ctk.CTkButton(self, text="Selecionar Padrão",
+        self.selecionar_arquivo_padrao = ctk.CTkButton(self, text="Selecionar Arquivo Padrão",
                         image=icone_file, 
                         compound="left")
         self.selecionar_arquivo_padrao.pack(pady=10, fill="x", padx=20)
@@ -19,10 +18,6 @@ class CalculoView(ctk.CTkFrame):
         self.selecionar_amostras = ctk.CTkButton(self, text="Selecionar Amostras",
                         image=icone_pasta, compound="left")
         self.selecionar_amostras.pack(pady=10, fill="x", padx=20)
-
-        self.escolher_padrao = ctk.CTkButton(self, text="Escolher Padrão",
-                command="", image=icone_padrao, compound="left")
-        self.escolher_padrao.pack(pady=10, fill="x", padx=20)
         
         self.calcular = ctk.CTkButton(self, text="Calcular Concentrações", font=("Arial Black", 12),
                        state="disabled",
@@ -30,16 +25,28 @@ class CalculoView(ctk.CTkFrame):
                         command="", image=icone_calcular, compound="left")
         self.calcular.pack(pady=40, fill="x", padx=20)
 
+class CalculoResultadoView(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
 
+        self.resultado_textbox = ctk.CTkTextbox(self, height=300, font=("Arial", 16))
+        self.resultado_textbox.pack(padx=20, pady=20, fill="both", expand=True)
 
-     
-        # Para habilitar o botão de calcular apenas quando os arquivos forem selecionados
-        #selecionado_arquivo_padrao = False
-        #selecionado_amostras = False
-        #selecionado_padrao = False
-        #def habilitar_calcular(selecionado_arquivo_padrao, selecionado_amostras, selecionado_padrao):
-        #    if selecionado_arquivo_padrao and selecionado_amostras and selecionado_padrao:
-        #        botao_calcular.configure(state="normal", command=calcular_concentracoes)
+    def mostrar_resultados(self, texto):
+        self.resultado_textbox.delete("1.0", "end")
+        self.resultado_textbox.insert("1.0", texto)
+        self.resultado_textbox.configure(state="disabled")
+
+class AttArquivoSelecionado(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+    def texto_pd(self, texto):
+        self.texto_arquivo_pd = ctk.CTkLabel(self, text=texto, font=("Arial", 16)).pack(pady=10)
+
+    def texto_am(self, texto):
+        self.texto_arquivos_am = ctk.CTkLabel(self, text=texto, font=("Arial", 16)).pack(pady=10)    
+
 
 #_____________________________________________________________________________________________________________________________________________________________________________________
 

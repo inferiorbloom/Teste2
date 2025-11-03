@@ -1,5 +1,7 @@
-{
-    "Farinha de Soja": {
+[
+    {
+    "nome": "Farinha de Soja",
+    "elementos": {
         "P": 5250.0,
         "S": 258.0,
         "K": 17762.0,
@@ -8,8 +10,11 @@
         "Fe": 137.0,
         "Cu": 12.8,
         "Zn": 35.9
+        }
     },
-    "Folha de Tomate": {
+    {
+    "nome": "Folha de Tomate", 
+    "elementos": {
         "Al": 598.4,
         "P": 2161.0,
         "S": 9600.0,
@@ -44,8 +49,11 @@
         "Hg": 0.0341,
         "Th": 0.12,
         "U": 0.035
+        }
     },
-    "Secundário Solo (Cana)": {
+    {
+    "nome": "Secundário Solo (Cana)", 
+    "elementos": {
         "K": 7380.0,
         "Ca": 13350.0,
         "Sc": 9.21,
@@ -57,15 +65,16 @@
         "Rb": 81.6,
         "La": 10.0,
         "Eu": 0.209
+        }
     },
-    "Solo Buffalo 8704": {
+    {
+    "nome": "Solo Buffalo 8704", 
+    "elementos": {
         "Al": 61000.0,
         "K": 20010.0,
         "Ca": 26410.0,
         "Sc": 11.26,
         "Ti": 4570.0
-    },
-    "Tinta": {
-        "H": 10.0
+        }
     }
-}
+]
