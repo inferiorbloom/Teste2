@@ -12,20 +12,34 @@ class Service:
         arquivo_padrao = askopenfilename(title="Selecione o arquivo.txt que deseja utilizar como PADRÃO!", 
                                          filetypes=[("Arquivos de texto", "*.txt")])
         texto_arquivo_padrao = ctk.CTkLabel(self.master, text="")
-        #texto_arquivo_padrao.grid(column=0, row=3, padx=10, pady=10)
         texto_arquivo_padrao.configure(text=os.path.basename(arquivo_padrao))
+        #arquivo = os.path.basename(arquivo_padrao)
         return arquivo_padrao
 
     # Função para selecionar arquivos das amostras
     def selecionar_arquivos_amostras(self):
-        arquivos = askopenfilenames(title="Selecione os arquivos.txt que deseja utilizar como AMOSTRAS!", 
+        arquivos_amostras = askopenfilenames(title="Selecione os arquivos.txt que deseja utilizar como AMOSTRAS!", 
                                     filetypes=[("Arquivos de texto", "*.txt")])
         texto_arquivos_amostras = ctk.CTkLabel(self.master, text="")
-        #texto_arquivos_amostras.grid(column=1, row=3, padx=10, pady=10, sticky="n")
-        if arquivos:
-            ultimo = os.path.basename(arquivos[-1])
-            primeiro = os.path.basename(arquivos[0])
+        if arquivos_amostras:
+            ultimo = os.path.basename(arquivos_amostras[-1])
+            primeiro = os.path.basename(arquivos_amostras[0])
             texto_arquivos_amostras.configure(text=f"{primeiro} ... {ultimo}")
         else:
             texto_arquivos_amostras.configure(text="Nenhum arquivo selecionado")
-        return arquivos
+        return arquivos_amostras
+
+'''
+    # Função para selecionar arquivos das amostras
+    def selecionar_arquivos_amostras(self):
+        arquivos_amostras = askopenfilenames(title="Selecione os arquivos.txt que deseja utilizar como AMOSTRAS!", 
+                                    filetypes=[("Arquivos de texto", "*.txt")])
+        texto_arquivos_amostras = ctk.CTkLabel(self.master, text="")
+        if arquivos_amostras:
+            #nomes_amostras = [os.path.basename(a) for a in arquivos_amostras]
+            texto_arquivos_amostras.configure(text=f"{nomes_amostras[0]} ... {nomes_amostras[-1]}")
+        else:
+            texto_arquivos_amostras.configure(text="Nenhum arquivo selecionado")
+        return nomes_amostras
+'''
+

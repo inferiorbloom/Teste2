@@ -1,26 +1,22 @@
 import os
-import json
+#import json
 #from service.variaveis import Variaveis
 
 class CalculoModel:
     # Função para calcular as concentrações
-    def calcular_concentracoes(self, lista_arquivos, lista_arquivo_padrao):
+    def calcular_concentracoes(self, lista_arquivos, lista_arquivo_padrao, c_padrao):
 
         if not lista_arquivo_padrao or not lista_arquivos:
             print("Nenhum arquivo ou padrão selecionado.")
             return {}
         
         # Variáveis globais
-        c_padrao = {"Ca": 2022, "Fe":137, "Cu": 12.8, "K": 17762, "Mg": 2061, "Mn": 32.6, "P":5250, "Zn": 35.9}
-        #padroes = {}
-        #path = r'padroes/padroes.json'
-        #if os.path.exists(path):
-            #with open(path, "r", encoding="utf-8") as f:
-                #padroes = json.load(f)
+        print('CCCCCCCCCCCCCCCCCCCC')
+        print(c_padrao["nome"])
+        print(c_padrao["elementos"])
 
-        #padrao_escolhido = os.path.basename(lista_arquivo_padrao[0]) if lista_arquivo_padrao else None
-        #c_padrao = padroes.get(padrao_escolhido, {})
-        
+        c_padrao = c_padrao["elementos"]
+
         # Dicionário dos elementos químicos
         elementos = {
             12: "Mg", 13: "Al", 14: "Si", 15: "P", 16: "S", 17: "Cl", 18: "Ar",
@@ -60,20 +56,20 @@ class CalculoModel:
 
         area_padrao = {}
         # Lê área do padrão
-        for caminho in lista_arquivos:
-            with open(caminho, "r", encoding="utf-8") as p:
-                for line in p:
-                    line = line.strip()
-                    if line and line[0].isdigit():
-                        valores = [v.strip() for v in line.split(",")]
-                        try:
-                            z = int(valores[0])
-                            area = float(valores[2])
-                            elemento = elementos.get(z, "-")
-                            area_padrao[elemento] = area
 
-                        except (ValueError, IndexError):
-                            continue
+        with open(lista_arquivo_padrao, "r", encoding="utf-8") as p:
+            for line in p:
+                line = line.strip()
+                if line and line[0].isdigit():
+                    valores = [v.strip() for v in line.split(",")]
+                    try:
+                        z = int(valores[0])
+                        area = float(valores[2])
+                        elemento = elementos.get(z, "-")
+                        area_padrao[elemento] = area
+
+                    except (ValueError, IndexError):
+                        continue
 
     #_____________________________________________________________________________________________________________________________________________________________________________________
     # Normalização e cálculo
@@ -85,7 +81,7 @@ class CalculoModel:
         #calcula o fator para cada amostra (baseado no ar)
         for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
             nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
-
+            
             # Encontra a área de Ar (18) na amostra
             area_ar_amostra = None
             for linha in info["linhas"]:
@@ -95,6 +91,7 @@ class CalculoModel:
 
             if area_ar_amostra and area_ar_padrao:
                 fatores_normalizacao[nome_amostra] = area_ar_padrao / area_ar_amostra
+                #print(fatores_normalizacao)
 
         # Normaliza todas as áreas na amostra
         #for linha in info["linhas"]:
@@ -104,7 +101,7 @@ class CalculoModel:
         for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
             nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
             fator = fatores_normalizacao.get(nome_amostra, 1)  # usa 1 se não houver fator (sem normalização)
-            
+           
             for linha in info["linhas"]:
                 num = linha[0]           # número do elemento
                 area_net = linha[2]      # área líquida medida
@@ -116,6 +113,7 @@ class CalculoModel:
                 # Calcula concentração apenas se o elemento estiver nos padrões
                 if elemento in c_padrao and elemento in area_padrao:
                     conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
+                    conc = round(conc, 3)
                     concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
 
         resultado_texto = ""

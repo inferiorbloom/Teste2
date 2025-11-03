@@ -1,31 +1,47 @@
+#import customtkinter as ctk
+from views.calculoView import CalculoView, CalculoResultadoView, AttArquivoSelecionado
 from models.calculoModel import CalculoModel
-from views.calculoView import CalculoView
 from service.service import Service
 from service.variaveis import Variaveis
 from viewmodels.exportarVM import ExportarVM
-import customtkinter as ctk
-
+from viewmodels.padraoVM import PadraoVM
+import os
 class CalculoVM:
-    def __init__(self, master):
-
-        self.view = CalculoView(master)
-        self.view.pack(fill="x", padx=10, pady=10)
-        
-        self.model = CalculoModel()
-        self.service = Service(master)
-        self.variaveis = Variaveis(master)
-        
-        self.export = ExportarVM(master)
-        self.export.export
-
-        # Inicializar atributos
-        self.arquivo_padrao = None
-        self.arquivos_amostras = None
+    def __init__(self, sidebar_frame, result_frame, arquivos_frame):
+        self.sidebar_frame = sidebar_frame
+        self.result_frame = result_frame
+        self.arquivos_frame = arquivos_frame
 
         # Variáveis para armazenar arquivos selecionados
-        self.lista_arquivo_padrao = self.arquivo_padrao
-        self.lista_arquivos = self.arquivos_amostras
-        self.resultado_var = ctk.StringVar()
+        self.variaveis = Variaveis(sidebar_frame)
+        self.arquivo_padrao = self.variaveis.lista_arquivo_padrao
+        self.arquivos_amostras = self.variaveis.lista_arquivos
+
+        #Chama os arquivos de service
+        self.service = Service(sidebar_frame)
+
+        self.padrao_vm = PadraoVM(sidebar_frame)
+        self.padrao_vm.padrao_view
+        self.lista_padrao = self.padrao_vm.volta_padrao()
+
+
+        #Chama os calculos de concentracao
+        self.model = CalculoModel()
+
+        #Chama a view dos botoes de calcular
+        self.view = CalculoView(sidebar_frame)
+        self.view.pack(fill="x", padx=10, pady=10)
+
+        #Chama o resultado
+        self.resultados = CalculoResultadoView(result_frame)
+        self.resultados.pack(fill="x", padx=10, pady=10)
+        self.resultados.resultado_textbox.insert("1.0", "")
+
+        self.texto_arquivo = AttArquivoSelecionado(arquivos_frame)
+        self.texto_arquivo.pack(fill="x", padx=10, pady=10)
+                
+        self.export = ExportarVM(sidebar_frame)
+        self.export.export
 
     def botoes(self):
         # Conectar os botões da View aos métodos da VM
@@ -38,7 +54,8 @@ class CalculoVM:
         if arquivo:
             self.arquivo_padrao = arquivo
             self._verificar_pronto()
-            print("Arquivo padrão selecionado:", self.arquivo_padrao)
+            print("Arquivo de padrão selecionado:", self.arquivo_padrao)
+            self.texto_arquivo.texto_pd("Arquivo padrão selecionado: " + os.path.basename(self.arquivo_padrao))
         return self.arquivo_padrao
 
     def amostras(self):
@@ -47,6 +64,8 @@ class CalculoVM:
             self.arquivos_amostras = arquivos
             self._verificar_pronto()
             print("Arquivos de amostras selecionadas:", self.arquivos_amostras)
+            nomes_amostras = [os.path.basename(a) + "," for a in arquivos]
+            self.texto_arquivo.texto_am(nomes_amostras)
         return self.arquivos_amostras
 
     def _verificar_pronto(self):
@@ -55,10 +74,14 @@ class CalculoVM:
             self.view.calcular.configure(state="normal")
 
     def calcular(self):
-        self.resultado = self.model.calcular_concentracoes(self.arquivos_amostras, self.arquivo_padrao)
+        self.c_padrao = self.padrao_vm.teste()
+        print('PRINT DO C_PADRAO em CALC_VM dentro de def calcular')
+        print(self.c_padrao)
+
+        self.resultado = self.model.calcular_concentracoes(self.arquivos_amostras, self.arquivo_padrao, self.c_padrao)
         if self.resultado:
             self.exportar()
-        return self.resultado
+        return self.resultados.mostrar_resultados(self.resultado)
     
     def exportar(self):
         """Habilita o botão Exportar"""

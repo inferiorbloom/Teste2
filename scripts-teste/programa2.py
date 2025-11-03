@@ -433,7 +433,7 @@ def calcular_concentracoes():
 
             # Aplica normalização na área antes do cálculo
             area_net_normalizada = area_net * fator
-
+            print(c_padrao)
             if elemento in c_padrao and elemento in area_padrao:
                 conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
                 concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
