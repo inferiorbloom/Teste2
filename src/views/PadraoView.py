@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from PIL import Image
 
 # Configurações iniciais do customtkinter
 ctk.set_appearance_mode("dark")
