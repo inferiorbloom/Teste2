@@ -11,9 +11,9 @@ class CalculoModel:
             return {}
         
         # Variáveis globais
-        print('CCCCCCCCCCCCCCCCCCCC')
-        print(c_padrao["nome"])
-        print(c_padrao["elementos"])
+        #print('CCCCCCCCCCCCCCCCCCCC')
+        #print(c_padrao["nome"])
+        #print(c_padrao["elementos"])
 
         c_padrao = c_padrao["elementos"]
 
@@ -115,12 +115,8 @@ class CalculoModel:
                     conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
                     conc = round(conc, 3)
                     concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
+            
+        return concentracoes
 
-        resultado_texto = ""
-        for chave, dados in concentracoes.items():
-            resultado_texto += f"--- {chave} ---\n"
-            for amostra, valores in dados.items():
-                resultado_texto += f"{amostra}: {valores}\n"
-        print(resultado_texto)
-        return resultado_texto
+
         

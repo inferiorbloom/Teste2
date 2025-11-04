@@ -19,10 +19,5 @@ class PadraoVM:
     def teste(self):
         escolha_atual = self.padrao_view.combobox.get()
         self.selecionado = next((item for item in self.padrao_view.lista_dados if item["nome"] == escolha_atual), None)
-        if self.selecionado:
-            print("Padrao selecinado em PD_VM (def teste):", self.selecionado["nome"])
-            print("Amostras em PD_VM (def teste)", self.selecionado["elementos"])
-        else:
-            print("N")
         return self.selecionado
        

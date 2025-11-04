@@ -32,9 +32,18 @@ class CalculoResultadoView(ctk.CTkFrame):
         self.resultado_textbox = ctk.CTkTextbox(self, height=300, font=("Arial", 16))
         self.resultado_textbox.pack(padx=20, pady=20, fill="both", expand=True)
 
-    def mostrar_resultados(self, texto):
+    def mostrar_resultados(self, concentracoes):
+        #print(concentracoes)
+        resultado_texto = ""
+        for chave, dados in concentracoes.items():
+            resultado_texto += f"--- {chave} ---\n"
+            for amostra, valores in dados.items():
+                resultado_texto += f"{amostra}: {valores}\n"
+
+        print(resultado_texto)
+
         self.resultado_textbox.delete("1.0", "end")
-        self.resultado_textbox.insert("1.0", texto)
+        self.resultado_textbox.insert("1.0", resultado_texto)
         self.resultado_textbox.configure(state="disabled")
 
 class AttArquivoSelecionado(ctk.CTkFrame):

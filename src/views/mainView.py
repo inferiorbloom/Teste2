@@ -62,5 +62,5 @@ class MainView(ctk.CTk):
         self.calculo_vm.botoes()
 
         #Botao dos Graficos
-        self.grafico_view = GraficosView(self.sidebar)
-        self.grafico_view.pack(fill="x", padx=10, pady=10)
+        #self.grafico_view = GraficosView(self.sidebar)
+        #self.grafico_view.pack(fill="x", padx=10, pady=10)
