@@ -6,7 +6,6 @@ class ExportarModel:
     def exportar_para_excel(self, lista_arquivos, resultados):
         arquivos = lista_arquivos
         #concentracoes = resultados
-        print('CATAPIMBAS')
 
         # --- Exportação dos dados originais (sem mudar nada) ---
         todos_dados = []
@@ -49,29 +48,50 @@ class ExportarModel:
         # Cria DataFrame direto das concentrações
         df_analise = pd.DataFrame.from_dict(analise, orient="index", columns=elementos_encontrados)
 
+        # Garante que o diretório exista
+        os.makedirs("tabela-excel", exist_ok=True)
+
+        caminho_arquivo = os.path.join("tabela-excel", "amostras.xlsx")
+        
         # Exporta para Excel com duas abas
-        with pd.ExcelWriter("amostras.xlsx") as writer:
+        with pd.ExcelWriter(caminho_arquivo) as writer:
             df_dados.to_excel(writer, sheet_name="Dados", index=False)
             df_analise.to_excel(writer, sheet_name="Análise", index=True)
-        #print("Exportação concluída!")
-'''
-        # Pop-up de confirmação
-        exportado = ctk.CTkToplevel(master)
-        exportado.title("Exportação Concluída")
-        texto_exportado = ctk.CTkLabel(
-            exportado,
-            text="Arquivo exportado com sucesso como 'amostras.xlsx'! 50 Reais por exportação.",
-            font=("Arial Black", 16), wraplength=400
+
+        print("Exportacao concluida!")
+
+        self.mostrar_popup_sucesso(caminho_arquivo)
+
+    # --------------------------------------------
+    # Pop-up de confirmação da exportação
+    # --------------------------------------------
+    def mostrar_popup_sucesso(self, caminho_arquivo):
+        popup = ctk.CTkToplevel()
+        popup.title("Exportação Concluída!")
+        popup.geometry("400x200")
+
+        label = ctk.CTkLabel(
+            popup,
+            text=f"Arquivo exportado com sucesso!\n\nSalvo em:\n{caminho_arquivo}",
+            font=("Arial", 16),
+            justify="center",
+            wraplength=360
         )
-        exportado.transient(janela)  # Torna a janela filha da janela principal
-        exportado.grab_set()  # Impede interação com a janela principal enquanto esta está aberta
-        texto_exportado.pack(padx=20, pady=20)
-        exportado.update_idletasks()
-        largura = exportado.winfo_width()
-        altura = exportado.winfo_height()
-        x = (exportado.winfo_screenwidth() // 2) - (largura // 2)
-        y = (exportado.winfo_screenheight() // 2) - (altura // 2)
-        exportado.geometry(f"+{x}+{y}")
-        #som_concluido()
-'''
-        
+        label.pack(pady=20, padx=20)
+
+        botao_ok = ctk.CTkButton(
+            popup,
+            text="Fechar",
+            width=100,
+            command=popup.destroy
+        )
+        botao_ok.pack(pady=10)
+
+        # Centraliza o pop-up na tela
+        popup.update_idletasks()
+        w, h = popup.winfo_width() + 100, popup.winfo_height()
+        x = (popup.winfo_screenwidth() // 2) - (w // 2)
+        y = (popup.winfo_screenheight() // 2) - (h // 2)
+        popup.geometry(f"{w}x{h}+{x}+{y}")
+
+        popup.grab_set()  # bloqueia interação com a janela principal
