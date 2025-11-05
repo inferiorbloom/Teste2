@@ -9,4 +9,7 @@ class GraficosView(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        ctk.CTkButton(self, text="Gráficos", command="").pack(pady=10, fill="x", padx=20)
+        icone_graficos = ctk.CTkImage(light_image=Image.open("imagens/icones/graficos.png"), size=(20, 20))
+
+        self.botao_grafico = ctk.CTkButton(self, state="disabled", image=icone_graficos, text="Gráficos", command="")
+        self.botao_grafico.pack(pady=10, fill="x", padx=20)

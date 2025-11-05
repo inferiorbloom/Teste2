@@ -5,11 +5,12 @@ from service.service import Service
 from service.variaveis import Variaveis
 from viewmodels.exportarVM import ExportarVM
 from viewmodels.padraoVM import PadraoVM
+from viewmodels.graficosVM import GraficosVM
 #from viewmodels.gerenciarPadraoVM import Gerenciar_PadraoVM
 
 class CalculoVM:
-    def __init__(self, main_frame, sidebar_frame, result_frame, arquivos_frame, dynamic_frame, mostrar_tela_inicial):
-        self.main_frame = main_frame
+    def __init__(self, sidebar_frame, result_frame, arquivos_frame, dynamic_frame, mostrar_tela_inicial):
+        
         self.sidebar_frame = sidebar_frame
         self.result_frame = result_frame
         self.arquivos_frame = arquivos_frame
@@ -45,6 +46,8 @@ class CalculoVM:
                 
         self.export = ExportarVM(sidebar_frame, self.variaveis)
         self.export.export
+
+        self.graficos = GraficosVM(sidebar_frame, self.variaveis)
 
     def botoes(self):
         # Conectar os botões da View aos métodos da VM
@@ -90,6 +93,7 @@ class CalculoVM:
         self.export.resultados = self.variaveis.resultados
         if self.resultado:
             self.export.habilita_exporta_excel()
+            self.graficos.habilita_graficos()
         return self.resultados.mostrar_resultados(self.resultado)
     
 
