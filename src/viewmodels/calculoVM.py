@@ -5,12 +5,16 @@ from service.service import Service
 from service.variaveis import Variaveis
 from viewmodels.exportarVM import ExportarVM
 from viewmodels.padraoVM import PadraoVM
+#from viewmodels.gerenciarPadraoVM import Gerenciar_PadraoVM
 
 class CalculoVM:
-    def __init__(self, sidebar_frame, result_frame, arquivos_frame):
+    def __init__(self, main_frame, sidebar_frame, result_frame, arquivos_frame, dynamic_frame, mostrar_tela_inicial):
+        self.main_frame = main_frame
         self.sidebar_frame = sidebar_frame
         self.result_frame = result_frame
         self.arquivos_frame = arquivos_frame
+        self.dynamic_frame = dynamic_frame
+        self.mostrar_tela_inicial = mostrar_tela_inicial
 
         # Variáveis para armazenar arquivos selecionados
         self.variaveis = Variaveis(sidebar_frame)
@@ -20,7 +24,7 @@ class CalculoVM:
         #Chama os arquivos de service
         self.service = Service(sidebar_frame)
 
-        self.padrao_vm = PadraoVM(sidebar_frame)
+        self.padrao_vm = PadraoVM(sidebar_frame, dynamic_frame, sidebar_frame, mostrar_tela_inicial)
         self.padrao_vm.padrao_view
         self.lista_padrao = self.padrao_vm.volta_padrao()
 
