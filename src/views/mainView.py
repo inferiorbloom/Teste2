@@ -1,9 +1,5 @@
 import customtkinter as ctk
 from viewmodels.calculoVM import CalculoVM
-#from viewmodels.gerenciarPadraoVM import Gerenciar_PadraoVM
-#from viewmodels.graficosVM import GraficosView
-#from viewmodels.graficosVM import GraficosVM
-#from viewmodels.exportarVM import ExportarVM
 
 # Configurações iniciais do customtkinter
 ctk.set_appearance_mode("dark")
@@ -40,12 +36,8 @@ class MainView(ctk.CTk):
         self.mostrar_tela_inicial()
 
         #Chama os Botoes Gerais e os Resultados
-        self.calculo_vm = CalculoVM(self.main_frame, self.sidebar, self.result_frame, self.arquivos_frame, self.dynamic_frame, self.mostrar_tela_inicial)
+        self.calculo_vm = CalculoVM(self.sidebar, self.result_frame, self.arquivos_frame, self.dynamic_frame, self.mostrar_tela_inicial)
         self.calculo_vm.botoes()
-
-        #Botao dos Graficos
-        #self.grafico_view = GraficosView(self.sidebar)
-        #self.grafico_view.pack(fill="x", padx=10, pady=10)
 
         #Botao Sair
         ctk.CTkButton(self.sidebar, text="Sair", fg_color="red", font=("Arial Black", 12), command=self.quit).pack(side="bottom", pady=20, fill="x", padx=20)
@@ -54,7 +46,7 @@ class MainView(ctk.CTk):
         """Recria apenas o conteúdo dinâmico da tela principal."""
         for widget in self.dynamic_frame.winfo_children():
             widget.destroy()
-
+        
         title = ctk.CTkLabel(self.dynamic_frame, text="Calcular Concentrações", font=("Arial", 24, "bold"))
         title.pack(pady=20)
 
@@ -78,10 +70,8 @@ class MainView(ctk.CTk):
         self.result_frame = ctk.CTkFrame(self.dynamic_frame)
         self.result_frame.pack(fill="both", expand=True, pady=10)
         
+        # Cria nova instância
+        #self.calculo_vm = CalculoVM(self.sidebar, self.result_frame, self.arquivos_frame, self.dynamic_frame, self.mostrar_tela_inicial)
+        #self.calculo_vm.botoes()
 
-
-
-
-
-
-
+         

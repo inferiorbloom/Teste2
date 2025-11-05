@@ -6,11 +6,12 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
 class Gerenciar_PadraoView(ctk.CTkFrame):
-    def __init__(self, sidebar, frame):
+    def __init__(self, sidebar, frame, dynamic_frame):
         super().__init__(sidebar)
 
         self.sidebar = sidebar
         self.frame = frame
+        self.dynamic_frame = dynamic_frame
 
         icone_gear = ctk.CTkImage(light_image=Image.open("imagens/icones/gear.png"), size=(20, 20))
 
@@ -29,3 +30,7 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
             command=""
         )
         self.botao_gerenciar.pack(side="right", padx=(0, 20))
+
+        self.texto_gerenciar = ctk.CTkLabel(self.dynamic_frame, text="Gerenciar Padroes", font=("Arial Black", 20))
+        
+        
