@@ -9,13 +9,15 @@ from viewmodels.graficosVM import GraficosVM
 #from viewmodels.gerenciarPadraoVM import Gerenciar_PadraoVM
 
 class CalculoVM:
-    def __init__(self, sidebar_frame, result_frame, arquivos_frame, dynamic_frame, mostrar_tela_inicial):
+    def __init__(self, sidebar_frame, result_frame, arquivos_frame, amostras_frame, dynamic_frame, mostrar_tela_inicial):
         
         self.sidebar_frame = sidebar_frame
         self.result_frame = result_frame
         self.arquivos_frame = arquivos_frame
+        self.amostras_frame = amostras_frame
         self.dynamic_frame = dynamic_frame
         self.mostrar_tela_inicial = mostrar_tela_inicial
+        self.botoes_criados = False
 
         # Variáveis para armazenar arquivos selecionados
         self.variaveis = Variaveis(sidebar_frame)
@@ -41,8 +43,11 @@ class CalculoVM:
         self.resultados.pack(fill="x", padx=10, pady=10)
         self.resultados.resultado_textbox.insert("1.0", "")
 
-        self.texto_arquivo = AttArquivoSelecionado(arquivos_frame)
-        self.texto_arquivo.pack(fill="x", padx=10, pady=10)
+        self.texto_arquivo_pd = AttArquivoSelecionado(arquivos_frame)
+        self.texto_arquivo_pd.pack(fill="x", padx=10, pady=10)
+
+        self.texto_arquivos_am = AttArquivoSelecionado(amostras_frame)
+        self.texto_arquivos_am.pack(fill="x", padx=10, pady=10)
                 
         self.export = ExportarVM(sidebar_frame, self.variaveis)
         self.export.export
@@ -50,10 +55,13 @@ class CalculoVM:
         self.graficos = GraficosVM(sidebar_frame, self.variaveis)
 
     def botoes(self):
+        if self.botoes_criados:
+            return  # impede recriação
         # Conectar os botões da View aos métodos da VM
         self.view.selecionar_arquivo_padrao.configure(command=self.padrao)
         self.view.selecionar_amostras.configure(command=self.amostras)
         self.view.calcular.configure(command=self.calcular)
+        self.botoes_criados = True
 
     def padrao(self):
         arquivo = self.service.selecionar_arquivo_padrao()
@@ -61,7 +69,7 @@ class CalculoVM:
             self.arquivo_padrao = arquivo
             self._verificar_pronto()
             #print("Arquivo de padrão selecionado:", self.arquivo_padrao)
-            self.texto_arquivo.texto_pd("Arquivo padrão selecionado: " + os.path.basename(self.arquivo_padrao))
+            self.texto_arquivo_pd.texto_pd(os.path.basename(self.arquivo_padrao))
         return self.arquivo_padrao
 
     def amostras(self):
@@ -71,7 +79,7 @@ class CalculoVM:
             self._verificar_pronto()
             #print("Arquivos de amostras selecionadas:", self.arquivos_amostras)
             nomes_amostras = [os.path.basename(a) + "," for a in arquivos]
-            self.texto_arquivo.texto_am(nomes_amostras)
+            self.texto_arquivos_am.texto_am(nomes_amostras)
         return self.arquivos_amostras
 
     def _verificar_pronto(self):
