@@ -12,11 +12,11 @@ class CalculoView(ctk.CTkFrame):
 
         self.selecionar_arquivo_padrao = ctk.CTkButton(self, text="Selecionar Arquivo Padrão",
                         image=icone_file, 
-                        compound="left")
+                        compound="left", font=("Arial", 12))
         self.selecionar_arquivo_padrao.pack(pady=10, fill="x", padx=20)
 
         self.selecionar_amostras = ctk.CTkButton(self, text="Selecionar Amostras",
-                        image=icone_pasta, compound="left")
+                        image=icone_pasta, compound="left", font=("Arial", 12))
         self.selecionar_amostras.pack(pady=10, fill="x", padx=20)
         
         self.calcular = ctk.CTkButton(self, text="Calcular Concentrações", font=("Arial Black", 12),

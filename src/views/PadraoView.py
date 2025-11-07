@@ -10,8 +10,8 @@ class PadraoView(ctk.CTkFrame):
 
         self.frame = frame
 
-        self.label_opcoes = ctk.CTkLabel(self.frame, text="Escolha um Padrão:", font=("Arial", 12, "bold"))
-        self.label_opcoes.pack(padx=66, pady=10)
+        self.label_opcoes = ctk.CTkLabel(self.frame, text="Escolha um Padrão:", font=("Arial", 14, "bold"))
+        self.label_opcoes.pack(padx=54, pady=10)
 
         self.lista_dados = {}
         self.selecionado = None
@@ -31,6 +31,7 @@ class PadraoView(ctk.CTkFrame):
                                         fg_color="#375270",
                                         state="readonly",
                                         values=list(nomes),
+                                        font=("Arial", 12),
                                         command=self.ao_selecionar
                                        )
         self.combobox.pack(side="right", padx=(0, 20))

@@ -14,5 +14,6 @@ class ExportarView(ctk.CTkFrame):
                        state="disabled",
                         command="",
                         image=icone_excel,
-                        compound="left")
+                        compound="left",
+                        font=("Arial", 12))
         self.exportar_botao.pack(pady=10, fill="x", padx=20)
