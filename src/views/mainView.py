@@ -41,7 +41,6 @@ class MainView(ctk.CTk):
         # Monta tela principal
         self.mostrar_tela_inicial()
 
-
     def mostrar_tela_inicial(self):
         # Limpa conteúdo anterior
         for widget in self.dynamic_frame.winfo_children():
@@ -54,42 +53,45 @@ class MainView(ctk.CTk):
         # Configuração de colunas
         self.dynamic_frame.grid_columnconfigure(0, weight=0)  # coluna dos textos
         self.dynamic_frame.grid_columnconfigure(1, weight=1)  # coluna das áreas
+        self.dynamic_frame.grid_rowconfigure(1, weight=0)
+        self.dynamic_frame.grid_rowconfigure(2, weight=0)
+        self.dynamic_frame.grid_rowconfigure(3, weight=0)
+        self.dynamic_frame.grid_rowconfigure(4, weight=1)
 
         # --- Linha 1: Arquivo Padrão ---
         self.label_padrao = ctk.CTkLabel(self.dynamic_frame, text="> Arquivo Padrão:", font=("Arial Black", 16))
-        self.label_padrao.grid(row=1, column=0, sticky="e", padx=(10, 10), pady=10)
+        self.label_padrao.grid(row=1, column=0, sticky="", padx=(10, 10), pady=10)
 
-        self.arquivos_frame = ctk.CTkFrame(self.dynamic_frame, width=40, height=40, fg_color="#2b2b2b")
-        self.arquivos_frame.grid(row=1, column=1, sticky="we", padx=(10, 40), pady=10)
-        self.arquivos_frame.grid_propagate(False)
+        self.arquivo_frame = ctk.CTkFrame(self.dynamic_frame, width=40, height=40, fg_color="#2b2b2b")
+        self.arquivo_frame.grid(row=1, column=1, sticky="w", padx=(10, 10), pady=10)
+        self.arquivo_frame.grid_propagate(False)
 
         # --- Linha 2: Arquivos Amostras ---
         self.label_amostras = ctk.CTkLabel(self.dynamic_frame, text="> Arquivos Amostras:", font=("Arial Black", 16))
-        self.label_amostras.grid(row=2, column=0, sticky="e", padx=(10, 10), pady=10)
+        self.label_amostras.grid(row=2, column=0, sticky="", padx=(10, 10), pady=10)
 
-        self.amostras_frame = ctk.CTkFrame(self.dynamic_frame, height=40, fg_color="#2b2b2b")
-        self.amostras_frame.grid(row=2, column=1, sticky="we", padx=(10, 40), pady=10)
+        self.amostras_frame = ctk.CTkFrame(self.dynamic_frame, width=40, height=40, fg_color="#2b2b2b")
+        self.amostras_frame.grid(row=2, column=1, sticky="w", padx=(10, 10), pady=10)
         self.amostras_frame.grid_propagate(False)
 
         # --- Linha 3: Resultados ---
         result_label = ctk.CTkLabel(self.dynamic_frame, text="- Resultados:", font=("Arial Black", 20))
-        result_label.grid(row=3, column=0, columnspan=1, pady=(40, 10))
+        result_label.grid(row=3, column=0, sticky="", pady=(40, 10))
 
         self.result_frame = ctk.CTkFrame(self.dynamic_frame, height=300)
         self.result_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=40, pady=(0, 20))
-
-        # Permite expansão vertical
-        self.dynamic_frame.grid_rowconfigure(4, weight=1)
-
-        if not hasattr(self, "botoes_criados"):
+            
+        if not hasattr(self, "calculo_vm"):
             # --- Instância da ViewModel ---
             self.calculo_vm = CalculoVM(
                 self.sidebar,
                 self.result_frame,
-                self.arquivos_frame,
+                self.arquivo_frame,
                 self.amostras_frame,
                 self.dynamic_frame,
                 self.mostrar_tela_inicial
             )
-            self.calculo_vm.botoes()
-            self.botoes_criados = True  # marca que já criou
+            if not hasattr(self, "botoes_criados"):
+                self.calculo_vm.botoes()
+                self.botoes_criados = True  # marca que já criou
+

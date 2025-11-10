@@ -6,14 +6,19 @@ from service.variaveis import Variaveis
 from viewmodels.exportarVM import ExportarVM
 from viewmodels.padraoVM import PadraoVM
 from viewmodels.graficosVM import GraficosVM
-#from viewmodels.gerenciarPadraoVM import Gerenciar_PadraoVM
 
 class CalculoVM:
-    def __init__(self, sidebar_frame, result_frame, arquivos_frame, amostras_frame, dynamic_frame, mostrar_tela_inicial):
+    def __init__(self, 
+                sidebar_frame,
+                result_frame,
+                arquivo_frame,
+                amostras_frame,
+                dynamic_frame,
+                mostrar_tela_inicial):
         
         self.sidebar_frame = sidebar_frame
         self.result_frame = result_frame
-        self.arquivos_frame = arquivos_frame
+        self.arquivos_frame = arquivo_frame
         self.amostras_frame = amostras_frame
         self.dynamic_frame = dynamic_frame
         self.mostrar_tela_inicial = mostrar_tela_inicial
@@ -27,6 +32,7 @@ class CalculoVM:
         #Chama os arquivos de service
         self.service = Service(sidebar_frame)
 
+        #Chama o PadraoVM
         self.padrao_vm = PadraoVM(sidebar_frame, dynamic_frame, sidebar_frame, mostrar_tela_inicial)
         self.padrao_vm.padrao_view
         self.lista_padrao = self.padrao_vm.volta_padrao()
@@ -39,24 +45,27 @@ class CalculoVM:
         self.view.pack(fill="x", padx=10, pady=10)
 
         #Chama o resultado
-        self.resultados = CalculoResultadoView(result_frame)
-        self.resultados.pack(fill="x", padx=10, pady=10)
-        self.resultados.resultado_textbox.insert("1.0", "")
+        self.resultados_view = CalculoResultadoView(self.result_frame)
+        self.resultados_view.pack(fill="x", padx=10, pady=10)
+        self.resultados_view.resultado_textbox.insert("1.0", "")
 
-        self.texto_arquivo_pd = AttArquivoSelecionado(arquivos_frame)
+        #Chama o texto dos arquivos
+        self.texto_arquivo_pd = AttArquivoSelecionado(self.arquivos_frame)
         self.texto_arquivo_pd.pack(fill="x", padx=10, pady=10)
 
-        self.texto_arquivos_am = AttArquivoSelecionado(amostras_frame)
+        self.texto_arquivos_am = AttArquivoSelecionado(self.amostras_frame)
         self.texto_arquivos_am.pack(fill="x", padx=10, pady=10)
-                
+
+        #Chama a Exportacao
         self.export = ExportarVM(sidebar_frame, self.variaveis)
         self.export.export
 
+        #Chama os Graficos
         self.graficos = GraficosVM(sidebar_frame, self.variaveis)
-
+        
     def botoes(self):
         if self.botoes_criados:
-            return  # impede recriação
+            return  # impede recriação de botoes
         # Conectar os botões da View aos métodos da VM
         self.view.selecionar_arquivo_padrao.configure(command=self.padrao)
         self.view.selecionar_amostras.configure(command=self.amostras)
@@ -69,7 +78,7 @@ class CalculoVM:
             self.arquivo_padrao = arquivo
             self._verificar_pronto()
             #print("Arquivo de padrão selecionado:", self.arquivo_padrao)
-            self.texto_arquivo_pd.texto_pd(os.path.basename(self.arquivo_padrao))
+            self.texto_arquivo_pd.atualizar(os.path.basename(self.arquivo_padrao))
         return self.arquivo_padrao
 
     def amostras(self):
@@ -79,7 +88,7 @@ class CalculoVM:
             self._verificar_pronto()
             #print("Arquivos de amostras selecionadas:", self.arquivos_amostras)
             nomes_amostras = [os.path.basename(a) + "," for a in arquivos]
-            self.texto_arquivos_am.texto_am(nomes_amostras)
+            self.texto_arquivos_am.atualizar(nomes_amostras)
         return self.arquivos_amostras
 
     def _verificar_pronto(self):
@@ -88,7 +97,7 @@ class CalculoVM:
             self.view.calcular.configure(state="normal")
 
     def calcular(self):
-        self.c_padrao = self.padrao_vm.teste()
+        self.c_padrao = self.padrao_vm.c_padrao_lista_selecionado()
         self.resultado = self.model.calcular_concentracoes(self.arquivos_amostras, self.arquivo_padrao, self.c_padrao)
         
         # Atualiza Variaveis global
@@ -102,7 +111,4 @@ class CalculoVM:
         if self.resultado:
             self.export.habilita_exporta_excel()
             self.graficos.habilita_graficos()
-        return self.resultados.mostrar_resultados(self.resultado)
-    
-
-
+        return self.resultados_view.mostrar_resultados(self.resultado)

@@ -28,7 +28,7 @@ class Gerenciar_PadraoVM:
 
     def _show_gerenciador(self):
         """Abre o painel de gerenciamento de padrões na área principal"""
-        #self.gerenciar_view.texto_gerenciar.pack(pady=20)
+        #self.gerenciar_view.texto_gerenciar.pack(side="right", padx=(0, 20))
         # Limpa o conteúdo atual da área principal
         self.gerenciar_visible = True        
         for widget in self.dynamic_frame.winfo_children():
