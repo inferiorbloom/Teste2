@@ -34,3 +34,4 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
         self.texto_gerenciar = ctk.CTkLabel(self.dynamic_frame, text="Gerenciar Padroes", font=("Arial Black", 20))
         
         
+        

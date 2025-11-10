@@ -31,50 +31,38 @@ class CalculoResultadoView(ctk.CTkFrame):
 
         self.resultado_textbox = ctk.CTkTextbox(self, height=300, font=("Arial", 16))
         self.resultado_textbox.pack(padx=20, pady=20, fill="both", expand=True)
+        self.resultado_textbox.configure(state="disabled")
 
     def mostrar_resultados(self, concentracoes):
-        #print(concentracoes)
+        # Monta texto
         resultado_texto = ""
         for chave, dados in concentracoes.items():
             resultado_texto += f"--- {chave} ---\n"
             for amostra, valores in dados.items():
                 resultado_texto += f"{amostra}: {valores}\n"
 
-        print(resultado_texto)
+        # Habilita antes de atualizar
+        self.resultado_textbox.configure(state="normal")
 
+        # Limpa e escreve
         self.resultado_textbox.delete("1.0", "end")
         self.resultado_textbox.insert("1.0", resultado_texto)
+
+        # Bloqueia edição novamente
         self.resultado_textbox.configure(state="disabled")
 
 class AttArquivoSelecionado(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-    def texto_pd(self, texto):
-        self.texto_arquivo_pd = ctk.CTkLabel(self, text=texto, font=("Arial", 16)).pack(pady=10)
+        # Cria os labels vazios apenas UMA VEZ
+        self.label = ctk.CTkLabel(self, text="", font=("Arial", 16))
+        self.label.pack(pady=10)
 
-    def texto_am(self, texto):
-        self.texto_arquivos_am = ctk.CTkLabel(self, text=texto, font=("Arial", 16)).pack(pady=10)    
+    def atualizar(self, texto):
+        self.label.configure(text=texto)
 
 
-#_____________________________________________________________________________________________________________________________________________________________________________________
 
-#_____________________________________________________________________________________________________________________________________________________________________________________
-# Título
-#titulo = ctk.CTkLabel(frame_cima, text="Seleção de Dados", font=("Arial Black", 24))
-#titulo.grid(row=0, column=0, padx=10, pady=10, sticky="ew", columnspan=2)
-# Faz as colunas ocuparem espaço proporcional
-#frame_cima.grid_columnconfigure(0, weight=1)
-#frame_cima.grid_columnconfigure(1, weight=1)
-
-# Textos à esquerda dentro do frame cima ----------  Seleção de padrão
-
-#texto_arquivo_padrao = ctk.CTkLabel(frame_cima, text="")
-#texto_arquivo_padrao.grid(column=0, row=3, padx=10, pady=10)
-
-# Textos à direita dentro do frame cima ----------  Seleção de amostras
-
-#texto_arquivos_amostras = ctk.CTkLabel(frame_cima, text="")
-#texto_arquivos_amostras.grid(column=1, row=3, padx=10, pady=10, sticky="n")
 
 

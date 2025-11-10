@@ -21,7 +21,7 @@ class PadraoVM:
         #print("Padroes carregados:", self.lista_padrao)
         return self.padrao_view.lista_box(self.lista_padrao, self.gerenciar_padraovm)
     
-    def teste(self):
+    def c_padrao_lista_selecionado(self):
         escolha_atual = self.padrao_view.combobox.get()
         self.selecionado = next((item for item in self.padrao_view.lista_dados if item["nome"] == escolha_atual), None)
         return self.selecionado
