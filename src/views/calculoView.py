@@ -29,27 +29,51 @@ class CalculoResultadoView(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        self.resultado_textbox = ctk.CTkTextbox(self, height=300, font=("Arial", 16))
-        self.resultado_textbox.pack(padx=20, pady=20, fill="both", expand=True)
-        self.resultado_textbox.configure(state="disabled")
+        # frame rolável que será a planilha
+        self.scroll = ctk.CTkScrollableFrame(self, fg_color="#2b2b2b")
+        self.scroll.pack(fill="both", expand=True, padx=20, pady=20)
 
+    # apagar conteúdo antigo
+    def limpar(self):
+        for w in self.scroll.winfo_children():
+            w.destroy()
+
+    # mostrar resultados como planilha
     def mostrar_resultados(self, concentracoes):
-        # Monta texto
-        resultado_texto = ""
-        for chave, dados in concentracoes.items():
-            resultado_texto += f"--- {chave} ---\n"
-            for amostra, valores in dados.items():
-                resultado_texto += f"{amostra}: {valores}\n"
+        self.limpar()
 
-        # Habilita antes de atualizar
-        self.resultado_textbox.configure(state="normal")
+        # Junta todos os elementos presentes em qualquer amostra
+        todos_elementos = set()
+        for conc_amostra in concentracoes.values():
+            for nome_amostra, elementos in conc_amostra.items():
+                todos_elementos.update(elementos.keys())
+        todos_elementos = sorted(todos_elementos)
 
-        # Limpa e escreve
-        self.resultado_textbox.delete("1.0", "end")
-        self.resultado_textbox.insert("1.0", resultado_texto)
+        # cria cabeçalho
+        ctk.CTkLabel(self.scroll, text="Amostra", font=("Arial Black", 15)).grid(
+            row=0, column=0, padx=10, pady=10
+        )
 
-        # Bloqueia edição novamente
-        self.resultado_textbox.configure(state="disabled")
+        for col, elemento in enumerate(todos_elementos, start=1):
+            ctk.CTkLabel(self.scroll, text=elemento, font=("Arial Black", 14)).grid(
+                row=0, column=col, padx=10, pady=10
+            )
+
+        # cria linhas da tabela
+        row = 1
+        for conc_amostra in concentracoes.values():
+            for nome_amostra, elementos in conc_amostra.items():
+                # nome da amostra
+                ctk.CTkLabel(self.scroll, text=nome_amostra, font=("Arial Black", 14)).grid(
+                    row=row, column=0, padx=10, pady=5, sticky="w"
+                )
+                # valores por elemento
+                for col, elemento in enumerate(todos_elementos, start=1):
+                    valor = elementos.get(elemento, "-")
+                    ctk.CTkLabel(self.scroll, text=str(valor), font=("Arial", 14)).grid(
+                        row=row, column=col, padx=10, pady=5
+                    )
+                row += 1
 
 class AttArquivoSelecionado(ctk.CTkFrame):
     def __init__(self, master):
@@ -61,8 +85,3 @@ class AttArquivoSelecionado(ctk.CTkFrame):
 
     def atualizar(self, texto):
         self.label.configure(text=texto)
-
-
-
-
-

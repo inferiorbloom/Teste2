@@ -16,6 +16,7 @@ class Gerenciar_PadraoVM:
         self.gerenciar_view.botao_gerenciar.pack(pady=5)
         #self.gerenciar_view.botao_gerenciar.grid(row=0, column=1, sticky="w", padx=10)
         self.gerenciar_view.botao_gerenciar.configure(command=self.toggle_gerenciar)
+        self.gerenciar_view.botao_gerenciar.configure(state="disabled")
         
     # -------------------------------------------
     # Toggle do painel "Gerenciar Padrões"

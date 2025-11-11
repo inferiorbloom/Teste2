@@ -46,8 +46,7 @@ class CalculoVM:
 
         #Chama o resultado
         self.resultados_view = CalculoResultadoView(self.result_frame)
-        self.resultados_view.pack(fill="x", padx=10, pady=10)
-        self.resultados_view.resultado_textbox.insert("1.0", "")
+        self.resultados_view.pack(padx=20, pady=20, fill="both", expand=True)
 
         #Chama o texto dos arquivos
         self.texto_arquivo_pd = AttArquivoSelecionado(self.arquivos_frame)

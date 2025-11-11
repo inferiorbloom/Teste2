@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from viewmodels.calculoVM import CalculoVM
-
+import tkinter as tk
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
@@ -9,7 +9,7 @@ class MainView(ctk.CTk):
         super().__init__()
 
         self.title("🧪 Calculadora de Concentrações")
-        self.geometry("1200x800")
+        self.geometry("1400x800")
         self.resizable(True, True)
 
         # --- SIDEBAR ---
@@ -56,7 +56,8 @@ class MainView(ctk.CTk):
         self.dynamic_frame.grid_rowconfigure(1, weight=0)
         self.dynamic_frame.grid_rowconfigure(2, weight=0)
         self.dynamic_frame.grid_rowconfigure(3, weight=0)
-        self.dynamic_frame.grid_rowconfigure(4, weight=1)
+        #self.dynamic_frame.grid_rowconfigure(4, weight=1)
+        self.dynamic_frame.grid_rowconfigure(4, weight=2)
 
         # --- Linha 1: Arquivo Padrão ---
         self.label_padrao = ctk.CTkLabel(self.dynamic_frame, text="> Arquivo Padrão:", font=("Arial Black", 16))
@@ -70,16 +71,38 @@ class MainView(ctk.CTk):
         self.label_amostras = ctk.CTkLabel(self.dynamic_frame, text="> Arquivos Amostras:", font=("Arial Black", 16))
         self.label_amostras.grid(row=2, column=0, sticky="", padx=(10, 10), pady=10)
 
-        self.amostras_frame = ctk.CTkFrame(self.dynamic_frame, width=40, height=40, fg_color="#2b2b2b")
-        self.amostras_frame.grid(row=2, column=1, sticky="w", padx=(10, 10), pady=10)
-        self.amostras_frame.grid_propagate(False)
+        # Frame externo
+        self.amostras_container = ctk.CTkFrame(self.dynamic_frame, fg_color="#2b2b2b")
+        self.amostras_container.grid(row=2, column=1, sticky="we", padx=(10, 40), pady=10)
+        self.amostras_container.grid_propagate(False)
+
+        # Canvas dentro do frame
+        self.amostras_canvas = tk.Canvas(self.amostras_container, height=67, bg="#2b2b2b", highlightthickness=0)
+        self.amostras_canvas.pack(fill="both", expand=True)
+
+        # Scroll horizontal
+        self.scroll_x = ctk.CTkScrollbar(self.amostras_container, orientation="horizontal", command=self.amostras_canvas.xview)
+        self.scroll_x.pack(side="bottom", fill="x")
+
+        self.amostras_canvas.configure(xscrollcommand=self.scroll_x.set)
+
+        # Frame real onde os nomes serão colocados
+        self.amostras_frame = ctk.CTkFrame(self.amostras_canvas, fg_color="#2b2b2b")
+        self.amostras_window = self.amostras_canvas.create_window((0, 0), window=self.amostras_frame, anchor="nw")
+
+        # Atualiza área rolável
+        def update_scroll(event=None):
+            self.amostras_canvas.configure(scrollregion=self.amostras_canvas.bbox("all"))
+
+        self.amostras_frame.bind("<Configure>", update_scroll)
 
         # --- Linha 3: Resultados ---
         result_label = ctk.CTkLabel(self.dynamic_frame, text="- Resultados:", font=("Arial Black", 20))
         result_label.grid(row=3, column=0, sticky="", pady=(40, 10))
 
-        self.result_frame = ctk.CTkFrame(self.dynamic_frame, height=300)
+        self.result_frame = ctk.CTkFrame(self.dynamic_frame, height=500)
         self.result_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=40, pady=(0, 20))
+        self.result_frame.grid_propagate(False)
             
         if not hasattr(self, "calculo_vm"):
             # --- Instância da ViewModel ---
@@ -93,5 +116,4 @@ class MainView(ctk.CTk):
             )
             if not hasattr(self, "botoes_criados"):
                 self.calculo_vm.botoes()
-                self.botoes_criados = True  # marca que já criou
-
+                self.botoes_criados = True  # marca que já criou os botoes
