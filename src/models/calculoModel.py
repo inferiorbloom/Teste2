@@ -93,10 +93,6 @@ class CalculoModel:
                 fatores_normalizacao[nome_amostra] = area_ar_padrao / area_ar_amostra
                 #print(fatores_normalizacao)
 
-        # Normaliza todas as áreas na amostra
-        #for linha in info["linhas"]:
-           # linha[2] *= fator  # normaliza a área líquida medida
-
         #import dos dados + cálculo
         for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
             nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
@@ -113,10 +109,7 @@ class CalculoModel:
                 # Calcula concentração apenas se o elemento estiver nos padrões
                 if elemento in c_padrao and elemento in area_padrao:
                     conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
-                    conc = round(conc, 3)
+                    conc = f"{conc:.3f}"
                     concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
             
         return concentracoes
-
-
-        
