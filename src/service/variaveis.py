@@ -20,17 +20,3 @@ class Variaveis(ctk.CTkFrame):
         print(f"- Arquivo padrão: {self.lista_arquivo_padrao}")
         print(f"- Amostras: {self.lista_arquivos}")
         print(f"- Resultados: {'OK' if self.resultados else 'Nenhum'}")
-
-    
-
-'''
-        #Variaveis de inicializacao
-        self.arquivo_padrao = None
-        self.arquivos_amostras = None
-        self.resultados = None
-
-        # Variáveis para armazenar arquivos selecionados
-        self.lista_arquivo_padrao = self.arquivo_padrao
-        self.lista_arquivos = self.arquivos_amostras
-        self.resultados_var = self.resultados
-'''

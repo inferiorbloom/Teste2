@@ -1,57 +1,63 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import customtkinter as ctk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class GraficosModel:
-    def graficos(self, resultados):
-        self.arquivos = resultados
+    def graficos(self, resultados, master=None):
+        self.concentracoes = resultados[0]
+        self.areas_norm = resultados[1]
         print("CARAMBA")
-        self.arquivos.verificar_estado()
-'''
+        #print(self.concentracoes)
+        #print(self.areas_norm)   
     
-        config_graficos = ctk.CTkToplevel(janela)
+        # cria uma nova janela (aba) sobre a janela principal
+        config_graficos = ctk.CTkToplevel(master)
         config_graficos.title("Configurar Gráficos")
-        config_graficos.transient(janela)
-        config_graficos.grab_set()
+        config_graficos.geometry("1000x800")
+        config_graficos.focus_force()
+        config_graficos.grab_set()  # impede interação com a janela principal enquanto aberta
 
-        # Centraliza na tela
+        # centraliza a nova aba
         largura, altura = 1000, 800
         x = (config_graficos.winfo_screenwidth() // 2) - (largura // 2)
         y = (config_graficos.winfo_screenheight() // 2) - (altura // 2)
-        config_graficos.geometry(f"{largura}x{altura}+{x}+{y}")
+        config_graficos.geometry(f"{largura-180}x{altura-300}+{x}+{y}")
 
         # --- seleção da amostra ---
         selecione_amostra = ctk.CTkComboBox(
             config_graficos,
-            values=[os.path.basename(arquivo).replace(".txt", "") for arquivo in arquivos]
+            values=list(self.areas_norm.keys()),  # nomes das amostras
+            width=300
         )
         selecione_amostra.grid(column=0, row=0, padx=10, pady=10)
 
         # --- slider ---
-        slider_valor = ctk.CTkSlider(config_graficos, from_=1, to=20, number_of_steps=19)
-        slider_valor.set(5)  # valor inicial
+        slider_valor = ctk.CTkSlider(config_graficos, from_=1, to=20, number_of_steps=19, width=200)
+        slider_valor.set(5)
         slider_valor.grid(column=1, row=0, padx=10, pady=10, sticky="ew")
 
         label_slider = ctk.CTkLabel(config_graficos, text="Traço: 5%")
         label_slider.grid(column=2, row=0, padx=10, pady=10)
 
-        # --- frame para os gráficos ---
+        # --- frame para gráficos ---
         frame_graficos = ctk.CTkFrame(config_graficos)
         frame_graficos.grid(column=0, row=1, columnspan=3, padx=10, pady=10, sticky="nsew")
         frame_graficos.grid_rowconfigure(0, weight=1)
-        frame_graficos.grid_columnconfigure((0,1), weight=1)
+        frame_graficos.grid_columnconfigure((0, 1), weight=1)
 
         canvas_maioritario = None
         canvas_traco = None
 
-        def atualizar_graficos(*args):
+        # --- função de atualização dos gráficos ---
+        def atualizar_graficos(*_):
             nonlocal canvas_maioritario, canvas_traco
             amostra_selecionada = selecione_amostra.get()
             if not amostra_selecionada:
                 return
 
-            # --- busca a concentração ---
+            # busca concentrações dessa amostra
             concs = None
-            for dados in concentracoes.values():
+            for dados in self.concentracoes.values():
                 if amostra_selecionada in dados:
                     concs = dados[amostra_selecionada]
                     break
@@ -59,21 +65,19 @@ class GraficosModel:
                 return
 
             elementos = list(concs.keys())
-            valores = list(concs.values())
+            valores = [float(v) for v in concs.values()]
 
-            # --- define limite do traço ---
+            # define limite de traço
             percentual = slider_valor.get()
             label_slider.configure(text=f"Traço: {percentual:.0f}%")
             soma_total = sum(valores)
             limite_traco = soma_total * (percentual / 100)
 
-            # separa elementos maiores e traços
-            elementos_traco = []
-            valores_traco = []
-            elementos_majoritarios = []
-            valores_majoritarios = []
-
+            # separa elementos
+            elementos_traco, valores_traco = [], []
+            elementos_majoritarios, valores_majoritarios = [], []
             soma_traco = 0
+
             for e, v in sorted(zip(elementos, valores), key=lambda x: x[1]):
                 if soma_traco + v <= limite_traco:
                     elementos_traco.append(e)
@@ -87,13 +91,14 @@ class GraficosModel:
             if canvas_maioritario:
                 canvas_maioritario.get_tk_widget().destroy()
             fig1, ax1 = plt.subplots(figsize=(4, 4))
-
             ax1.pie(valores_majoritarios + [soma_traco],
                     labels=elementos_majoritarios + ["Traço"],
                     autopct='%1.1f%%', startangle=140)
             ax1.set_title(f"Gráfico Majoritário - {amostra_selecionada}")
+
             canvas_maioritario = FigureCanvasTkAgg(fig1, master=frame_graficos)
             canvas_maioritario.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+            plt.close(fig1)  # <<< FECHA a figura no matplotlib
 
             # --- gráfico traço ---
             if canvas_traco:
@@ -102,9 +107,11 @@ class GraficosModel:
             if valores_traco:
                 ax2.pie(valores_traco, labels=elementos_traco, autopct='%1.1f%%', startangle=140)
             ax2.set_title(f"Gráfico Traço - até {percentual:.0f}%")
+
             canvas_traco = FigureCanvasTkAgg(fig2, master=frame_graficos)
             canvas_traco.get_tk_widget().grid(row=0, column=1, sticky="nsew")
+            plt.close(fig2)  # <<< FECHA a figura no matplotlib
 
-        # vincula slider
-        slider_valor.configure(command=lambda val: atualizar_graficos())
-'''
+        # vincula eventos
+        selecione_amostra.configure(command=lambda _: atualizar_graficos())
+        slider_valor.configure(command=lambda _: atualizar_graficos())

@@ -1,6 +1,4 @@
 import os
-#import json
-#from service.variaveis import Variaveis
 
 class CalculoModel:
     # Função para calcular as concentrações
@@ -10,11 +8,6 @@ class CalculoModel:
             print("Nenhum arquivo ou padrão selecionado.")
             return {}
         
-        # Variáveis globais
-        #print('CCCCCCCCCCCCCCCCCCCC')
-        #print(c_padrao["nome"])
-        #print(c_padrao["elementos"])
-
         c_padrao = c_padrao["elementos"]
 
         # Dicionário dos elementos químicos
@@ -46,7 +39,6 @@ class CalculoModel:
             nome_amostra = nome_amostra.strip()  # remove espaços em branco
             concentracoes[f"concentracao{i}"] = {nome_amostra: {}}
             
-
         #aqui, ele pega o conteudo que vai ser o documento de texto pulando as 5 linhas iniciais e o lê linha por linha, tirando espaços e formatando, basicamente
         for doc in documentos.values():  # doc é o dicionário interno
             with open(doc["caminho"], "r", encoding="utf-8") as f:
@@ -67,21 +59,20 @@ class CalculoModel:
                         area = float(valores[2])
                         elemento = elementos.get(z, "-")
                         area_padrao[elemento] = area
-
                     except (ValueError, IndexError):
                         continue
 
     #_____________________________________________________________________________________________________________________________________________________________________________________
     # Normalização e cálculo
         area_ar_padrao = area_padrao.get("Ar", None)
-
         #dicionario para guardar os fatores de normalização
         fatores_normalizacao = {}
+        areas_normalizadas = {}
 
         #calcula o fator para cada amostra (baseado no ar)
         for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
             nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
-            
+
             # Encontra a área de Ar (18) na amostra
             area_ar_amostra = None
             for linha in info["linhas"]:
@@ -91,13 +82,13 @@ class CalculoModel:
 
             if area_ar_amostra and area_ar_padrao:
                 fatores_normalizacao[nome_amostra] = area_ar_padrao / area_ar_amostra
-                #print(fatores_normalizacao)
 
         #import dos dados + cálculo
         for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
             nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
             fator = fatores_normalizacao.get(nome_amostra, 1)  # usa 1 se não houver fator (sem normalização)
-           
+            areas_normalizadas[nome_amostra] = {}
+
             for linha in info["linhas"]:
                 num = linha[0]           # número do elemento
                 area_net = linha[2]      # área líquida medida
@@ -105,11 +96,12 @@ class CalculoModel:
                 
                 #aplica normalização na área antes do cálculo
                 area_net_normalizada = area_net * fator
+                areas_normalizadas[nome_amostra][elemento] = area_net_normalizada
 
                 # Calcula concentração apenas se o elemento estiver nos padrões
                 if elemento in c_padrao and elemento in area_padrao:
                     conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
                     conc = f"{conc:.3f}"
                     concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
-            
-        return concentracoes
+                    
+        return [concentracoes, areas_normalizadas]

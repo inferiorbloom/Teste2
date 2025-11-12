@@ -110,4 +110,4 @@ class CalculoVM:
         if self.resultado:
             self.export.habilita_exporta_excel()
             self.graficos.habilita_graficos()
-        return self.resultados_view.mostrar_resultados(self.resultado)
+        return self.resultados_view.mostrar_resultados(self.resultado[0])

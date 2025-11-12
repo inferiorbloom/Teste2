@@ -1,5 +1,4 @@
 from views.exportarView import ExportarView
-from service.variaveis import Variaveis
 from models.exportarModel import ExportarModel
 
 class ExportarVM:
@@ -22,6 +21,6 @@ class ExportarVM:
     def exporta_excel(self):
         #print('Exportando...')
         #self.variaveis.verificar_estado()        
-        self.exporta_excel_var = self.exportar_model.exportar_para_excel(self.arquivos_amostras, self.resultados)
+        self.exporta_excel_var = self.exportar_model.exportar_para_excel(self.arquivos_amostras, self.resultados[0])
         return self.exporta_excel_var
     
