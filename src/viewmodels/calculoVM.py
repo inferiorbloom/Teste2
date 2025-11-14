@@ -33,7 +33,7 @@ class CalculoVM:
         self.service = Service(sidebar_frame)
 
         #Chama o PadraoVM
-        self.padrao_vm = PadraoVM(sidebar_frame, dynamic_frame, sidebar_frame, mostrar_tela_inicial)
+        self.padrao_vm = PadraoVM(sidebar_frame, dynamic_frame, sidebar_frame)
         self.padrao_vm.padrao_view
         self.lista_padrao = self.padrao_vm.volta_padrao()
 
