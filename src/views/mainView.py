@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from viewmodels.calculoVM import CalculoVM
 import tkinter as tk
+
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 

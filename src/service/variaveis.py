@@ -4,15 +4,15 @@ import os
 
 class Variaveis(ctk.CTkFrame):
     def __init__(self, master=None):
+        super().__init__(master)
         self.lista_arquivo_padrao = None
         self.lista_arquivos = []
-        self.padroes = []
-        self.resultados = {}  #vamos usar isso para armazenar resultados
+        self.resultados = [None, None]  #armazena os resultados (concentracoes e areas normalizadas)
 
         self.padroes = {}
-        path = r'padroes/padroes.json'
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
+        self.path = r'padroes/padroes.json'
+        if os.path.exists(self.path):
+            with open(self.path, "r", encoding="utf-8") as f:
                 self.padroes = json.load(f)
         
     def verificar_estado(self):
