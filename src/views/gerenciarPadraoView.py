@@ -8,9 +8,11 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
 class Gerenciar_PadraoView(ctk.CTkFrame):
-    def __init__(self, sidebar, frame, dynamic_frame, variaveis):
+    def __init__(self, sidebar, frame, dynamic_frame, variaveis, padrao_view):
         super().__init__(sidebar)
 
+        self.combobox_padroes = padrao_view
+        
         self.variaveis = variaveis
         self.caminho_json = self.variaveis.path
         self.frame = frame
@@ -88,12 +90,12 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
         bot_salvar.pack(pady=20)
 
         # exibe lista inicial
-        self.atualizar_lista()
+        self.atualizar_lista_json()
 
     # ---------------------------
     #       ATUALIZAR LISTA
     # ---------------------------
-    def atualizar_lista(self):
+    def atualizar_lista_json(self):
         self.lista_padroes.delete("1.0", "end")
 
         for padrao in self.padroes:
@@ -148,6 +150,8 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
 
             self.variaveis.padroes = novos.copy()
             messagebox.showinfo("Sucesso", "Padrões atualizados!")
-
+            
         except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao salvar:\n{e}")
+            messagebox.showerror("Erro", f"Falha ao salvar:\n{e}")       
+
+        self.combobox_padroes.atualizar_lista(novos) #Atualiza a lista da combobox que mostra os padroes

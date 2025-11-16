@@ -50,3 +50,19 @@ class PadraoView(ctk.CTkFrame):
             return self.selecionado
         else:
             print("Nenhum padrão encontrado.")
+
+    def atualizar_lista(self, nova_lista):
+        """ Atualiza a ComboBox após salvar novos padrões no JSON """
+        self.lista_dados = nova_lista
+        nomes = [item["nome"] for item in nova_lista]
+
+        # Atualizar valores
+        if self.combobox:
+            self.combobox.configure(values=nomes)
+
+        # Selecionar o primeiro automaticamente
+        if nomes:
+            self.combobox.set(nomes[0])
+            self.selecionado = nova_lista[0]
+
+        #print("ComboBox atualizada com:", nomes)

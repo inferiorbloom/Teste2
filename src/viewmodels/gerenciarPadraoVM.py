@@ -2,7 +2,7 @@ from views.gerenciarPadraoView import Gerenciar_PadraoView
 from service.variaveis import Variaveis
 
 class Gerenciar_PadraoVM:
-    def __init__(self, dynamic_frame, sidebar, frame):
+    def __init__(self, dynamic_frame, sidebar, frame, padrao_view):
         self.dynamic_frame = dynamic_frame
         self.sidebar = sidebar
         #self.callback_voltar_inicio = callback_voltar_inicio
@@ -10,7 +10,7 @@ class Gerenciar_PadraoVM:
 
         self.variaveis = Variaveis(sidebar)
         #self.variaveis.padroes
-        self.gerenciar_view = Gerenciar_PadraoView(self.sidebar, frame, dynamic_frame, self.variaveis)
+        self.gerenciar_view = Gerenciar_PadraoView(self.sidebar, frame, dynamic_frame, self.variaveis, padrao_view)
         
         self.gerenciar_frame = None
         self.gerenciar_visible = False

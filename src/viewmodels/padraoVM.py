@@ -3,6 +3,7 @@ from views.PadraoView import PadraoView
 from service.variaveis import Variaveis
 from viewmodels.gerenciarPadraoVM import Gerenciar_PadraoVM
 import customtkinter as ctk
+
 class PadraoVM:
     def __init__(self, master, dynamic_frame, sidebar_frame):
         self.frame = ctk.CTkFrame(master)
@@ -14,7 +15,7 @@ class PadraoVM:
         self.variaveis = Variaveis(master)
         self.variaveis.padroes
         
-        self.gerenciar_padraovm = Gerenciar_PadraoVM(dynamic_frame, sidebar_frame, self.frame)
+        self.gerenciar_padraovm = Gerenciar_PadraoVM(dynamic_frame, sidebar_frame, self.frame, self.padrao_view)
                 
     def volta_padrao(self):
         self.lista_padrao = self.variaveis.padroes
