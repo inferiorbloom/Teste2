@@ -1,4 +1,4 @@
-#Ignorar .vscode e scripts-teste
+#Ignorar: .vscode e scripts-teste
 .vscode
 scripts-teste/
 
