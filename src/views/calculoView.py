@@ -10,6 +10,9 @@ class CalculoView(ctk.CTkFrame):
         icone_file = ctk.CTkImage(light_image=Image.open("imagens/icones/file.png"), size=(20, 20))
         icone_calcular = ctk.CTkImage(light_image=Image.open("imagens/icones/calcular.png"), size=(20, 20))
 
+        self.label_select = ctk.CTkLabel(self, text="Selecione os arquivos:", font=("Arial", 14, "bold"))
+        self.label_select.pack(pady=10, fill="x", padx=20)
+
         self.selecionar_arquivo_padrao = ctk.CTkButton(self, text="Selecionar Arquivo Padrão",
                         image=icone_file, 
                         compound="left", font=("Arial", 12))
@@ -18,12 +21,15 @@ class CalculoView(ctk.CTkFrame):
         self.selecionar_amostras = ctk.CTkButton(self, text="Selecionar Amostras",
                         image=icone_pasta, compound="left", font=("Arial", 12))
         self.selecionar_amostras.pack(pady=10, fill="x", padx=20)
-        
+
+        self.label_calc = ctk.CTkLabel(self, text="Calcule:", font=("Arial", 14, "bold"))
+        self.label_calc.pack(pady=10, fill="x", padx=20)
+
         self.calcular = ctk.CTkButton(self, text="Calcular Concentrações", font=("Arial Black", 12),
                        state="disabled",
                        fg_color="#0D740F", text_color="#FFFFFF",
                         command="", image=icone_calcular, compound="left")
-        self.calcular.pack(pady=40, fill="x", padx=20)
+        self.calcular.pack(pady=10, fill="x", padx=20)
 
 class CalculoResultadoView(ctk.CTkFrame):
     def __init__(self, master):

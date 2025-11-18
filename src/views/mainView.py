@@ -48,8 +48,13 @@ class MainView(ctk.CTk):
             widget.destroy()
 
         # Título
-        title = ctk.CTkLabel(self.dynamic_frame, text="Calcular Concentrações", font=("Arial Black", 24, "bold"))
+        title = ctk.CTkLabel(self.dynamic_frame, text="Calcular Concentrações.", font=("Arial Black", 24, "bold"))
         title.grid(row=0, column=0, columnspan=2, pady=(10, 30))
+
+        self.label_instrucoes = ctk.CTkLabel(self.dynamic_frame, text="No Menu à esquerda escolha um Padrão, selecione os Arquivos necessários e Calcule. \n"
+                                                                      "Ao fim, exporte-os para o Excel e crie os Gráficos se quiser.",
+                                                                      font=("Arial", 15), justify="center")
+        self.label_instrucoes.grid(row=1, column=0, columnspan=2, pady=(10, 30))
 
         # Configuração de colunas
         self.dynamic_frame.grid_columnconfigure(0, weight=0)  # coluna dos textos
@@ -62,19 +67,19 @@ class MainView(ctk.CTk):
 
         # --- Linha 1: Arquivo Padrão ---
         self.label_padrao = ctk.CTkLabel(self.dynamic_frame, text="> Arquivo Padrão:", font=("Arial Black", 16))
-        self.label_padrao.grid(row=1, column=0, sticky="", padx=(10, 10), pady=10)
+        self.label_padrao.grid(row=2, column=0, sticky="", padx=(10, 10), pady=10)
 
         self.arquivo_frame = ctk.CTkFrame(self.dynamic_frame, width=40, height=40, fg_color="#2b2b2b")
-        self.arquivo_frame.grid(row=1, column=1, sticky="w", padx=(10, 10), pady=10)
+        self.arquivo_frame.grid(row=2, column=1, sticky="w", padx=(10, 10), pady=10)
         self.arquivo_frame.grid_propagate(False)
 
         # --- Linha 2: Arquivos Amostras ---
         self.label_amostras = ctk.CTkLabel(self.dynamic_frame, text="> Arquivos Amostras:", font=("Arial Black", 16))
-        self.label_amostras.grid(row=2, column=0, sticky="", padx=(10, 10), pady=10)
+        self.label_amostras.grid(row=3, column=0, sticky="", padx=(10, 10), pady=10)
 
         # Frame externo
         self.amostras_container = ctk.CTkFrame(self.dynamic_frame, fg_color="#2b2b2b")
-        self.amostras_container.grid(row=2, column=1, sticky="we", padx=(10, 40), pady=10)
+        self.amostras_container.grid(row=3, column=1, sticky="we", padx=(10, 40), pady=10)
         self.amostras_container.grid_propagate(False)
 
         # Canvas dentro do frame
@@ -99,10 +104,10 @@ class MainView(ctk.CTk):
 
         # --- Linha 3: Resultados ---
         result_label = ctk.CTkLabel(self.dynamic_frame, text="- Resultados:", font=("Arial Black", 20))
-        result_label.grid(row=3, column=0, sticky="", pady=(40, 10))
+        result_label.grid(row=4, column=0, sticky="", pady=(40, 10))
 
         self.result_frame = ctk.CTkFrame(self.dynamic_frame, height=500)
-        self.result_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=40, pady=(0, 20))
+        self.result_frame.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=40, pady=(0, 20))
         self.result_frame.grid_propagate(False)
             
         if not hasattr(self, "calculo_vm"):
