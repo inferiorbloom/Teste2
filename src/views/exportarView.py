@@ -10,6 +10,10 @@ class ExportarView(ctk.CTkFrame):
         super().__init__(master)
 
         icone_excel = ctk.CTkImage(light_image=Image.open("imagens/icones/excel.png"), size=(20, 20))
+
+        self.label = ctk.CTkLabel(self, text="Exporte:", font=("Arial", 14, "bold"))
+        self.label.pack(pady=10, fill="x", padx=20)
+
         self.exportar_botao = ctk.CTkButton(self, text="Exportar para Excel",
                        state="disabled",
                         command="",
