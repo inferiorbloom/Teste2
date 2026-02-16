@@ -1,30 +1,33 @@
 from views.gerenciarPadraoView import Gerenciar_PadraoView
-from service.variaveis import Variaveis
+from store.variaveis import Variaveis
+
 
 class Gerenciar_PadraoVM:
     def __init__(self, dynamic_frame, sidebar, frame, padrao_view):
         self.dynamic_frame = dynamic_frame
         self.sidebar = sidebar
-        #self.callback_voltar_inicio = callback_voltar_inicio
+        # self.callback_voltar_inicio = callback_voltar_inicio
         self.frame = frame
 
         self.variaveis = Variaveis(sidebar)
-        #self.variaveis.padroes
+        # self.variaveis.padroes
         self.gerenciar_view = Gerenciar_PadraoView(self.sidebar, frame, dynamic_frame, self.variaveis, padrao_view)
-        
+
         self.gerenciar_frame = None
         self.gerenciar_visible = False
 
     def botao_gerenciar(self):
         # Cria e exibe o painel de gerenciamento
         self.gerenciar_view.botao_gerenciar.pack(pady=5)
-        #self.gerenciar_view.botao_gerenciar.grid(row=0, column=1, sticky="w", padx=10)
-        #self.gerenciar_view.botao_gerenciar.configure(command="")
-        #self.gerenciar_view.botao_gerenciar.configure(state="disabled")
-        
+        # self.gerenciar_view.botao_gerenciar.grid(row=0, column=1, sticky="w", padx=10)
+        # self.gerenciar_view.botao_gerenciar.configure(command="")
+        # self.gerenciar_view.botao_gerenciar.configure(state="disabled")
+
     # -------------------------------------------
     # Toggle do painel "Gerenciar Padrões"
     # -------------------------------------------
+
+
 """
     def toggle_gerenciar(self):
         if self.gerenciar_visible:

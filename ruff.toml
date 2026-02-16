@@ -1,0 +1,29 @@
+line-length = 200
+
+[lint]
+select = [
+    "F",
+    "E",
+    "W",
+    "C90",
+    "I",
+    "N",
+    "UP",
+    "YTT",
+    "ANN",
+    "ASYNC",
+    "S",
+    "BLE",
+    "FBT",
+    "B",
+    "A",
+    "COM",
+    "C4",
+    "PL"
+]
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+

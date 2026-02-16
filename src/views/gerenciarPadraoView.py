@@ -7,12 +7,13 @@ from tkinter import messagebox
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
+
 class Gerenciar_PadraoView(ctk.CTkFrame):
     def __init__(self, sidebar, frame, dynamic_frame, variaveis, padrao_view):
         super().__init__(sidebar)
 
         self.combobox_padroes = padrao_view
-        
+
         self.variaveis = variaveis
         self.caminho_json = self.variaveis.path
         self.frame = frame
@@ -22,7 +23,7 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
 
         # Botão Gerenciar
         self.botao_gerenciar = ctk.CTkButton(
-            #self.sidebar,
+            # self.sidebar,
             self.frame,
             text="",
             image=icone_gear,
@@ -31,8 +32,8 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
             corner_radius=8,
             font=("Arial Black", 12),
             fg_color="#213A57",
-            #hover_color="#777777",
-            command=self.janela_gerenciar
+            # hover_color="#777777",
+            command=self.janela_gerenciar,
         )
         self.botao_gerenciar.pack(side="right", padx=(0, 20))
 
@@ -41,9 +42,9 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
         # Carrega JSON do Variaveis
         try:
             # self.caminho_json **não é um caminho**, aqui tem erro (vou explicar abaixo)
-            self.padroes = self.variaveis.padroes.copy()   
+            self.padroes = self.variaveis.padroes.copy()
         except:
-            self.padroes = {} # caso nao exista
+            self.padroes = {}  # caso nao exista
 
         # cria a janela
         self.win = ctk.CTkToplevel()
@@ -69,12 +70,10 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
         frame_lista.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         frame_lista.rowconfigure(1, weight=1)
 
-        frame_lista.columnconfigure(0, weight=1)   # <-- centraliza
+        frame_lista.columnconfigure(0, weight=1)  # <-- centraliza
         frame_lista.rowconfigure(1, weight=1)
 
-        ctk.CTkLabel(frame_lista, text="Padrões carregados", font=("Arial Black", 16)).grid(
-            row=0, column=0, pady=10
-        )
+        ctk.CTkLabel(frame_lista, text="Padrões carregados", font=("Arial Black", 16)).grid(row=0, column=0, pady=10)
 
         self.lista_padroes = ctk.CTkTextbox(frame_lista, width=300)
         self.lista_padroes.grid(row=1, column=0, sticky="nsew", padx=5)
@@ -85,8 +84,7 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
 
         ctk.CTkLabel(frame_form, text="Atualize os padrões", font=("Arial Black", 16)).pack(pady=10)
 
-        bot_salvar = ctk.CTkButton(frame_form, text="Salvar Padrões", fg_color="#00992e",
-                                   command=self.salvar_padroes)
+        bot_salvar = ctk.CTkButton(frame_form, text="Salvar Padrões", fg_color="#00992e", command=self.salvar_padroes)
         bot_salvar.pack(pady=20)
 
         # exibe lista inicial
@@ -116,16 +114,92 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
 
             # lista com símbolos válidos para detectar elementos
             simbolos_validos = {
-                "Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn",
-                "Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y",
-                "Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I",
-                "Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho",
-                "Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl",
-                "Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu"
+                "Mg",
+                "Al",
+                "Si",
+                "P",
+                "S",
+                "Cl",
+                "Ar",
+                "K",
+                "Ca",
+                "Sc",
+                "Ti",
+                "V",
+                "Cr",
+                "Mn",
+                "Fe",
+                "Co",
+                "Ni",
+                "Cu",
+                "Zn",
+                "Ga",
+                "Ge",
+                "As",
+                "Se",
+                "Br",
+                "Kr",
+                "Rb",
+                "Sr",
+                "Y",
+                "Zr",
+                "Nb",
+                "Mo",
+                "Tc",
+                "Ru",
+                "Rh",
+                "Pd",
+                "Ag",
+                "Cd",
+                "In",
+                "Sn",
+                "Sb",
+                "Te",
+                "I",
+                "Xe",
+                "Cs",
+                "Ba",
+                "La",
+                "Ce",
+                "Pr",
+                "Nd",
+                "Pm",
+                "Sm",
+                "Eu",
+                "Gd",
+                "Tb",
+                "Dy",
+                "Ho",
+                "Er",
+                "Tm",
+                "Yb",
+                "Lu",
+                "Hf",
+                "Ta",
+                "W",
+                "Re",
+                "Os",
+                "Ir",
+                "Pt",
+                "Au",
+                "Hg",
+                "Tl",
+                "Pb",
+                "Bi",
+                "Po",
+                "At",
+                "Rn",
+                "Fr",
+                "Ra",
+                "Ac",
+                "Th",
+                "Pa",
+                "U",
+                "Np",
+                "Pu",
             }
 
             for linha in texto.split("\n"):
-
                 if not linha.strip():
                     continue
 
@@ -150,8 +224,8 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
 
             self.variaveis.padroes = novos.copy()
             messagebox.showinfo("Sucesso", "Padrões atualizados!")
-            
-        except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao salvar:\n{e}")       
 
-        self.combobox_padroes.atualizar_lista(novos) #Atualiza a lista da combobox que mostra os padroes
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao salvar:\n{e}")
+
+        self.combobox_padroes.atualizar_lista(novos)  # Atualiza a lista da combobox que mostra os padroes

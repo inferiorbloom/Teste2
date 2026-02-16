@@ -7,6 +7,7 @@ class Variaveis(ctk.CTkFrame):
         super().__init__(master)
         self.lista_arquivo_padrao = None
         self.lista_arquivos = []
+        self.resultado_limite = []
         self.resultados = [None, None]  #armazena os resultados (concentracoes e areas normalizadas)
 
         self.padroes = {}
@@ -14,9 +15,10 @@ class Variaveis(ctk.CTkFrame):
         if os.path.exists(self.path):
             with open(self.path, "r", encoding="utf-8") as f:
                 self.padroes = json.load(f)
-        
+
     def verificar_estado(self):
         print("Verificando estado atual das variáveis:")
         print(f"- Arquivo padrão: {self.lista_arquivo_padrao}")
         print(f"- Amostras: {self.lista_arquivos}")
+        print(f"- Resultado_limite: {self.resultado_limite}")
         print(f"- Resultados: {'OK' if self.resultados else 'Nenhum'}")

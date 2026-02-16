@@ -1,21 +1,23 @@
 import os
-from views.calculoView import CalculoView, CalculoResultadoView, AttArquivoSelecionado
-from models.calculoModel import CalculoModel
-from service.service import Service
-from service.variaveis import Variaveis
+from views.concentracaoView import ConcentracaoView, ConcentracaoResultadoView, AttArquivoSelecionado
+from models.concentracaoModel import ConcentracaoModel
+from service.fileService import Service
+from store.variaveis import Variaveis
 from viewmodels.exportarVM import ExportarVM
 from viewmodels.padraoVM import PadraoVM
 from viewmodels.graficosVM import GraficosVM
+from viewmodels.limiteDeteccaoVM import LimiteDeteccaoVM
 
-class CalculoVM:
-    def __init__(self, 
+
+class ConcentracaoVM:
+    def __init__(self,
                 sidebar_frame,
                 result_frame,
                 arquivo_frame,
                 amostras_frame,
                 dynamic_frame,
                 mostrar_tela_inicial):
-        
+
         self.sidebar_frame = sidebar_frame
         self.result_frame = result_frame
         self.arquivos_frame = arquivo_frame
@@ -28,55 +30,57 @@ class CalculoVM:
         self.variaveis = Variaveis(sidebar_frame)
         self.arquivo_padrao = self.variaveis.lista_arquivo_padrao
         self.arquivos_amostras = self.variaveis.lista_arquivos
+        self.resultado_limite = self.variaveis.resultado_limite
 
-        #Chama os arquivos de service
+        # Chama os arquivos de service
         self.service = Service(sidebar_frame)
 
-        #Chama o PadraoVM
+        # Chama o PadraoVM
         self.padrao_vm = PadraoVM(sidebar_frame, dynamic_frame, sidebar_frame)
         self.padrao_vm.padrao_view
         self.lista_padrao = self.padrao_vm.volta_padrao()
 
-        #Chama os calculos de concentracao
-        self.model = CalculoModel()
+        # Chama os calculos de concentracao
+        self.model = ConcentracaoModel()
 
-        #Chama a view dos botoes de calcular
-        self.view = CalculoView(sidebar_frame)
+        # Chama a view dos botoes de calcular
+        self.view = ConcentracaoView(sidebar_frame)
         self.view.pack(fill="x", padx=10, pady=10)
 
-        #Chama o resultado
-        self.resultados_view = CalculoResultadoView(self.result_frame)
+        # Chama o resultado
+        self.resultados_view = ConcentracaoResultadoView(self.result_frame)
         self.resultados_view.pack(padx=20, pady=20, fill="both", expand=True)
 
-        #Chama o texto dos arquivos
+        # Chama o texto dos arquivos
         self.texto_arquivo_pd = AttArquivoSelecionado(self.arquivos_frame)
         self.texto_arquivo_pd.pack(fill="x", padx=10, pady=10)
 
         self.texto_arquivos_am = AttArquivoSelecionado(self.amostras_frame)
         self.texto_arquivos_am.pack(fill="x", padx=10, pady=10)
 
-        #Chama a Exportacao
+        # Chama a Exportacao
         self.export = ExportarVM(sidebar_frame, self.variaveis)
-        self.export.export
+        #self.export.export
 
-        #Chama os Graficos
+        # Chama os Graficos
         self.graficos = GraficosVM(sidebar_frame, self.variaveis)
-        
+
     def botoes(self):
-        if self.botoes_criados:
-            return  # impede recriação de botoes
+        if not self.botoes_criados:
+        # impede recriação de botoes
         # Conectar os botões da View aos métodos da VM
-        self.view.selecionar_arquivo_padrao.configure(command=self.padrao)
-        self.view.selecionar_amostras.configure(command=self.amostras)
-        self.view.calcular.configure(command=self.calcular)
-        self.botoes_criados = True
+            self.view.selecionar_arquivo_padrao.configure(command=self.padrao)
+            self.view.selecionar_amostras.configure(command=self.amostras)
+            self.view.selecionar_fullReport.configure(command=self.report)
+            self.view.calcular.configure(command=self.calcular)
+            self.botoes_criados = True
 
     def padrao(self):
         arquivo = self.service.selecionar_arquivo_padrao()
         if arquivo:
             self.arquivo_padrao = arquivo
             self._verificar_pronto()
-            #print("Arquivo de padrão selecionado:", self.arquivo_padrao)
+            # print("Arquivo de padrão selecionado:", self.arquivo_padrao)
             self.texto_arquivo_pd.atualizar(os.path.basename(self.arquivo_padrao))
         return self.arquivo_padrao
 
@@ -85,20 +89,31 @@ class CalculoVM:
         if arquivos:
             self.arquivos_amostras = arquivos
             self._verificar_pronto()
-            #print("Arquivos de amostras selecionadas:", self.arquivos_amostras)
+            # print("Arquivos de amostras selecionadas:", self.arquivos_amostras)
             nomes_amostras = [os.path.basename(a) + "," for a in arquivos]
             self.texto_arquivos_am.atualizar(nomes_amostras)
         return self.arquivos_amostras
 
+    def report(self):
+        self.limite_deteccao = LimiteDeteccaoVM(self.service, self.variaveis)
+        arquivo_report = self.limite_deteccao.calcula_resultado_limite()
+        if arquivo_report:
+            self.resultado_limite = arquivo_report
+            self._verificar_pronto()
+        return self.resultado_limite
+
     def _verificar_pronto(self):
         """Habilita o botão Calcular quando tudo estiver selecionado."""
-        if self.arquivos_amostras and self.arquivo_padrao:
+        if self.arquivos_amostras and self.arquivo_padrao and self.resultado_limite:
             self.view.calcular.configure(state="normal")
 
     def calcular(self):
         self.c_padrao = self.padrao_vm.c_padrao_lista_selecionado()
-        self.resultado = self.model.calcular_concentracoes(self.arquivos_amostras, self.arquivo_padrao, self.c_padrao)
-        
+        self.resultado = self.model.calcular_concentracoes(self.arquivos_amostras,
+                                                           self.arquivo_padrao,
+                                                           self.resultado_limite,
+                                                           self.c_padrao)
+
         # Atualiza Variaveis global
         self.variaveis.resultados = self.resultado
         self.variaveis.lista_arquivos = self.arquivos_amostras

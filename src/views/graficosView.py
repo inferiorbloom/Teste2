@@ -5,6 +5,7 @@ from PIL import Image
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
+
 class GraficosView(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -14,5 +15,7 @@ class GraficosView(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text="Crie Gráficos:", font=("Arial", 14, "bold"))
         self.label.pack(pady=10, fill="x", padx=20)
 
-        self.botao_grafico = ctk.CTkButton(self, state="disabled", image=icone_graficos, text="Gráficos", font=("Arial", 12), command="")
+        self.botao_grafico = ctk.CTkButton(
+            self, state="disabled", image=icone_graficos, text="Gráficos", font=("Arial", 12), command=""
+        )
         self.botao_grafico.pack(pady=10, fill="x", padx=20)
