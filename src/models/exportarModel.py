@@ -2,17 +2,18 @@ import pandas as pd
 import os
 import customtkinter as ctk
 
+
 class ExportarModel:
     def exportar_para_excel(self, lista_arquivos, resultados):
         arquivos = lista_arquivos
-        #concentracoes = resultados
+        # concentracoes = resultados
 
         # --- Exportação dos dados originais (sem mudar nada) ---
         todos_dados = []
         for arquivo in arquivos:
             nome_amostra = os.path.basename(arquivo).replace(".txt", "")
             todos_dados.append([nome_amostra, "", "", "", ""])
-            #todos_dados.append(["Elemento", "Z", "Energia", "Área", "Erro"])
+            # todos_dados.append(["Elemento", "Z", "Energia", "Área", "Erro"])
             with open(arquivo, "r", encoding="utf-8") as f:
                 linhas = f.readlines()[5:]
                 for linha in linhas:
@@ -29,7 +30,7 @@ class ExportarModel:
             todos_dados.append(["", "", "", "", ""])
 
         df_dados = pd.DataFrame(todos_dados, columns=["Elemento", "Z", "Energia", "Área", "Erro"])
-        #print(df_dados)
+        # print(df_dados)
 
         # --- Exportação da análise (concentrações já calculadas) ---
         # Agora só usa o dicionário `concentracoes` que já foi gerado antes
@@ -39,11 +40,7 @@ class ExportarModel:
                 analise[nome_amostra] = elementos  # já tem os elementos e valores
 
         # Extrai todos os elementos detectados
-        elementos_encontrados = sorted({
-            elemento
-            for valores in analise.values()
-            for elemento in valores.keys()
-        })
+        elementos_encontrados = sorted({elemento for valores in analise.values() for elemento in valores.keys()})
 
         # Cria DataFrame direto das concentrações
         df_analise = pd.DataFrame.from_dict(analise, orient="index", columns=elementos_encontrados)
@@ -52,7 +49,7 @@ class ExportarModel:
         os.makedirs("tabela-excel", exist_ok=True)
 
         caminho_arquivo = os.path.join("tabela-excel", "amostras.xlsx")
-        
+
         # Exporta para Excel com duas abas
         with pd.ExcelWriter(caminho_arquivo) as writer:
             df_dados.to_excel(writer, sheet_name="Dados", index=False)
@@ -75,16 +72,11 @@ class ExportarModel:
             text=f"Arquivo exportado com sucesso!\n\nSalvo em:\n{caminho_arquivo}",
             font=("Arial", 16),
             justify="center",
-            wraplength=360
+            wraplength=360,
         )
         label.pack(pady=20, padx=20)
 
-        botao_ok = ctk.CTkButton(
-            popup,
-            text="Fechar",
-            width=100,
-            command=popup.destroy
-        )
+        botao_ok = ctk.CTkButton(popup, text="Fechar", width=100, command=popup.destroy)
         botao_ok.pack(pady=10)
 
         # Centraliza o pop-up na tela

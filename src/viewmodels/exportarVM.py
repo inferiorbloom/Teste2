@@ -1,6 +1,7 @@
 from views.exportarView import ExportarView
 from models.exportarModel import ExportarModel
 
+
 class ExportarVM:
     def __init__(self, master, variaveis):
 
@@ -17,10 +18,9 @@ class ExportarVM:
     def habilita_exporta_excel(self):
         """Habilita o botão Exportar"""
         self.export.exportar_botao.configure(state="normal")
-             
+
     def exporta_excel(self):
-        #print('Exportando...')
-        #self.variaveis.verificar_estado()        
+        # print('Exportando...')
+        # self.variaveis.verificar_estado()
         self.exporta_excel_var = self.exportar_model.exportar_para_excel(self.arquivos_amostras, self.resultados[0])
         return self.exporta_excel_var
-    

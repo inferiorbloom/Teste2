@@ -5,6 +5,7 @@ from PIL import Image
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
+
 class ExportarView(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -14,10 +15,13 @@ class ExportarView(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text="Exporte:", font=("Arial", 14, "bold"))
         self.label.pack(pady=10, fill="x", padx=20)
 
-        self.exportar_botao = ctk.CTkButton(self, text="Exportar para Excel",
-                       state="disabled",
-                        command="",
-                        image=icone_excel,
-                        compound="left",
-                        font=("Arial", 12))
+        self.exportar_botao = ctk.CTkButton(
+            self,
+            text="Exportar para Excel",
+            state="disabled",
+            command="",
+            image=icone_excel,
+            compound="left",
+            font=("Arial", 12),
+        )
         self.exportar_botao.pack(pady=10, fill="x", padx=20)

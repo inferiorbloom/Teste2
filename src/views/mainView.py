@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from viewmodels.calculoVM import CalculoVM
+from viewmodels.concentracaoVM import ConcentracaoVM
 import tkinter as tk
 
 ctk.set_appearance_mode("dark")
@@ -30,12 +30,7 @@ class MainView(ctk.CTk):
 
         # Botão Sair
         self.botao_sair = ctk.CTkButton(
-            self.sidebar,
-            text="Sair",
-            fg_color="red",
-            text_color="#FFFFFF",
-            font=("Arial Black", 12),
-            command=self.quit
+            self.sidebar, text="Sair", fg_color="red", text_color="#FFFFFF", font=("Arial Black", 12), command=self.quit
         )
         self.botao_sair.pack(side="bottom", pady=20, fill="x", padx=20)
 
@@ -51,9 +46,13 @@ class MainView(ctk.CTk):
         title = ctk.CTkLabel(self.dynamic_frame, text="Calcular Concentrações.", font=("Arial Black", 24, "bold"))
         title.grid(row=0, column=0, columnspan=2, pady=(10, 30))
 
-        self.label_instrucoes = ctk.CTkLabel(self.dynamic_frame, text="No Menu à esquerda escolha um Padrão, selecione os Arquivos necessários e Calcule. \n"
-                                                                      "Ao fim, exporte-os para o Excel e crie os Gráficos se quiser.",
-                                                                      font=("Arial", 15), justify="center")
+        self.label_instrucoes = ctk.CTkLabel(
+            self.dynamic_frame,
+            text="No Menu à esquerda escolha um Padrão, selecione os Arquivos necessários e Calcule. \n"
+            "Ao fim, exporte-os para o Excel e crie os Gráficos se quiser.",
+            font=("Arial", 15),
+            justify="center",
+        )
         self.label_instrucoes.grid(row=1, column=0, columnspan=2, pady=(10, 30))
 
         # Configuração de colunas
@@ -62,7 +61,7 @@ class MainView(ctk.CTk):
         self.dynamic_frame.grid_rowconfigure(1, weight=0)
         self.dynamic_frame.grid_rowconfigure(2, weight=0)
         self.dynamic_frame.grid_rowconfigure(3, weight=0)
-        #self.dynamic_frame.grid_rowconfigure(4, weight=1)
+        # self.dynamic_frame.grid_rowconfigure(4, weight=1)
         self.dynamic_frame.grid_rowconfigure(4, weight=2)
 
         # --- Linha 1: Arquivo Padrão ---
@@ -87,7 +86,9 @@ class MainView(ctk.CTk):
         self.amostras_canvas.pack(fill="both", expand=True)
 
         # Scroll horizontal
-        self.scroll_x = ctk.CTkScrollbar(self.amostras_container, orientation="horizontal", command=self.amostras_canvas.xview)
+        self.scroll_x = ctk.CTkScrollbar(
+            self.amostras_container, orientation="horizontal", command=self.amostras_canvas.xview
+        )
         self.scroll_x.pack(side="bottom", fill="x")
 
         self.amostras_canvas.configure(xscrollcommand=self.scroll_x.set)
@@ -109,16 +110,16 @@ class MainView(ctk.CTk):
         self.result_frame = ctk.CTkFrame(self.dynamic_frame, height=500)
         self.result_frame.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=40, pady=(0, 20))
         self.result_frame.grid_propagate(False)
-            
+
         if not hasattr(self, "calculo_vm"):
             # --- Instância da ViewModel ---
-            self.calculo_vm = CalculoVM(
+            self.calculo_vm = ConcentracaoVM(
                 self.sidebar,
                 self.result_frame,
                 self.arquivo_frame,
                 self.amostras_frame,
                 self.dynamic_frame,
-                self.mostrar_tela_inicial
+                self.mostrar_tela_inicial,
             )
             if not hasattr(self, "botoes_criados"):
                 self.calculo_vm.botoes()

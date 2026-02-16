@@ -2,14 +2,15 @@ import matplotlib.pyplot as plt
 import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+
 class GraficosModel:
     def graficos(self, resultados, master=None):
         self.concentracoes = resultados[0]
         self.areas_norm = resultados[1]
         print("CARAMBA")
-        #print(self.concentracoes)
-        #print(self.areas_norm)   
-    
+        # print(self.concentracoes)
+        # print(self.areas_norm)
+
         # cria uma nova janela (aba) sobre a janela principal
         config_graficos = ctk.CTkToplevel(master)
         config_graficos.title("Configurar Gráficos")
@@ -21,13 +22,13 @@ class GraficosModel:
         largura, altura = 1000, 800
         x = (config_graficos.winfo_screenwidth() // 2) - (largura // 2)
         y = (config_graficos.winfo_screenheight() // 2) - (altura // 2)
-        config_graficos.geometry(f"{largura-180}x{altura-300}+{x}+{y}")
+        config_graficos.geometry(f"{largura - 180}x{altura - 300}+{x}+{y}")
 
         # --- seleção da amostra ---
         selecione_amostra = ctk.CTkComboBox(
             config_graficos,
             values=list(self.areas_norm.keys()),  # nomes das amostras
-            width=300
+            width=300,
         )
         selecione_amostra.grid(column=0, row=0, padx=10, pady=10)
 
@@ -91,9 +92,12 @@ class GraficosModel:
             if canvas_maioritario:
                 canvas_maioritario.get_tk_widget().destroy()
             fig1, ax1 = plt.subplots(figsize=(4, 4))
-            ax1.pie(valores_majoritarios + [soma_traco],
-                    labels=elementos_majoritarios + ["Traço"],
-                    autopct='%1.1f%%', startangle=140)
+            ax1.pie(
+                valores_majoritarios + [soma_traco],
+                labels=elementos_majoritarios + ["Traço"],
+                autopct="%1.1f%%",
+                startangle=140,
+            )
             ax1.set_title(f"Gráfico Majoritário - {amostra_selecionada}")
 
             canvas_maioritario = FigureCanvasTkAgg(fig1, master=frame_graficos)
@@ -105,7 +109,7 @@ class GraficosModel:
                 canvas_traco.get_tk_widget().destroy()
             fig2, ax2 = plt.subplots(figsize=(4, 4))
             if valores_traco:
-                ax2.pie(valores_traco, labels=elementos_traco, autopct='%1.1f%%', startangle=140)
+                ax2.pie(valores_traco, labels=elementos_traco, autopct="%1.1f%%", startangle=140)
             ax2.set_title(f"Gráfico Traço - até {percentual:.0f}%")
 
             canvas_traco = FigureCanvasTkAgg(fig2, master=frame_graficos)
