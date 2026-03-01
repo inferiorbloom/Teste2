@@ -7,10 +7,9 @@ class ConcentracaoModel:
     def calcular_concentracoes(self,
                                lista_arquivos,
                                lista_arquivo_padrao,
-                               resultado_limite,
                                c_padrao):
 
-        print(resultado_limite)
+        #print(resultado_limite)
 
         if not lista_arquivo_padrao or not lista_arquivos:
             print("Nenhum arquivo ou padrão selecionado.")

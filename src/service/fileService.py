@@ -52,37 +52,82 @@ class Service:
             filetypes=[("FullReports", "*.pdf")]
             )
 
-        # Função para extrair os valores de background do PDF do FullReport - Incluindo média dos backgrounds quando houver mais de um valor para o mesmo elemento
         with pdfplumber.open(fullreport) as pdf:
             texto = ""
             for pagina in pdf.pages:
                 texto += pagina.extract_text() + "\n"
 
         linhas = texto.splitlines()
-        backgrounds_raw = defaultdict(list)
+
+        # IMPORTANTE: estrutura correta
+        backgrounds_raw = defaultdict(lambda: {"K": [], "L": []})
+
         elemento_atual = None
+        camada_atual = None
 
         for i, linha in enumerate(linhas):
-            # início de elemento (ex: 12Ni K)
-            m_elem = re.match(r"\s*\d+\s*([A-Z][a-z]?)\s*K\b", linha)
+
+            # ----------------------------------------------
+            # Início de elemento (ex: 12Ni K ou 56Ba L)
+            # ----------------------------------------------
+            m_elem = re.match(r"\s*\d+\s*([A-Z][a-z]?)\s+(K|L)\b", linha)
             if m_elem:
                 elemento_atual = m_elem.group(1)
+                camada_atual = m_elem.group(2)
+                #print(linha)
+                #print(m_elem)
                 continue
 
-            # KA1 ou KA2 (mas NÃO Escape)
-            if elemento_atual and re.match(r"\s*KA[12]\b(?!\s*Escape)", linha):
-                if i + 1 < len(linhas):
-                    prox = linhas[i + 1]
+            # ----------------------------------------------
+            # Camada K → KA1 / KA2 (exceto Escape)
+            # ----------------------------------------------
+            if elemento_atual and camada_atual == "K":
+                if re.match(r"\s*KA[12]\b(?!\s*Escape)", linha):
+                    if i + 1 < len(linhas):
+                        prox = linhas[i + 1]
+                        m_bg = re.search(r"\d+\.\d+\d+\.\d+\s+(\d+)\b", prox)
+                        if m_bg:
+                            bg = int(m_bg.group(1))
+                            backgrounds_raw[elemento_atual]["K"].append(bg)
 
+            # ----------------------------------------------
+            # Camada L → guardar (área, background)
+            # ----------------------------------------------
+            if elemento_atual and camada_atual == "L":
+                m_area = re.search(r"(\d+)\s*±", linha)
+                if m_area and i + 1 < len(linhas):
+                    prox = linhas[i + 1]
                     m_bg = re.search(r"\d+\.\d+\d+\.\d+\s+(\d+)\b", prox)
                     if m_bg:
+                        area = int(m_area.group(1))
                         bg = int(m_bg.group(1))
-                        backgrounds_raw[elemento_atual].append(bg)
+                        backgrounds_raw[elemento_atual]["L"].append((area, bg))
 
+        # ======================================================
+        # Decisão final por elemento
+        # ======================================================
         backgrounds = {}
-        for elemento, valores in backgrounds_raw.items():
-            if len(valores) == 1:
-                backgrounds[elemento] = valores[0]
-            else:
-                backgrounds[elemento] = round(sum(valores) / len(valores))
+
+        for elemento, dados in backgrounds_raw.items():
+
+            # Prioridade: camada K
+            if dados["K"]:
+                if len(dados["K"]) == 1:
+                    backgrounds[elemento] = dados["K"][0]
+                else:
+                    backgrounds[elemento] = round(sum(dados["K"]) / len(dados["K"]))
+
+            # Caso não tenha K, usa L (linha dominante)
+            elif dados["L"]:
+                # ordena por área (maior → menor)
+                dados_L_ordenados = sorted(dados["L"], key=lambda x: x[0], reverse=True)
+
+                # pega as duas maiores áreas
+                if len(dados_L_ordenados) >= 2:
+                    bg1 = dados_L_ordenados[0][1]
+                    bg2 = dados_L_ordenados[1][1]
+                    backgrounds[elemento] = round((bg1 + bg2) / 2)
+                else:
+                    # só uma linha L disponível
+                    backgrounds[elemento] = dados_L_ordenados[0][1]
         return backgrounds

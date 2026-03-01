@@ -10,7 +10,6 @@ class ConcentracaoView(ctk.CTkFrame):
         icone_pasta = ctk.CTkImage(light_image=Image.open("imagens/icones/pasta.png"), size=(20, 20))
         icone_file = ctk.CTkImage(light_image=Image.open("imagens/icones/file.png"), size=(20, 20))
         icone_calcular = ctk.CTkImage(light_image=Image.open("imagens/icones/calcular.png"), size=(20, 20))
-        icone_lista = ctk.CTkImage(light_image=Image.open("imagens/icones/lista.png"), size=(20, 20))
 
         self.label_select = ctk.CTkLabel(self, text="Selecione os arquivos:", font=("Arial", 14, "bold"))
         self.label_select.pack(pady=10, fill="x", padx=20)
@@ -24,11 +23,6 @@ class ConcentracaoView(ctk.CTkFrame):
             self, text="Selecionar Amostras", image=icone_pasta, compound="left", font=("Arial", 12)
         )
         self.selecionar_amostras.pack(pady=10, fill="x", padx=20)
-
-        self.selecionar_fullReport = ctk.CTkButton(
-            self, text="Selecionar FullReport", image=icone_lista, compound="left", font=("Arial", 12)
-        )
-        self.selecionar_fullReport.pack(pady=10, fill="x", padx=20)
 
         self.label_calc = ctk.CTkLabel(self, text="Calcule:", font=("Arial", 14, "bold"))
         self.label_calc.pack(pady=10, fill="x", padx=20)
@@ -45,7 +39,6 @@ class ConcentracaoView(ctk.CTkFrame):
             compound="left",
         )
         self.calcular.pack(pady=10, fill="x", padx=20)
-
 
 class ConcentracaoResultadoView(ctk.CTkFrame):
     def __init__(self, master):
