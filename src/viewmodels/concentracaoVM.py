@@ -65,13 +65,15 @@ class ConcentracaoVM:
         # Chama os Graficos
         self.graficos = GraficosVM(sidebar_frame, self.variaveis)
 
+        # Chama os Limite
+        self.limite_deteccao = LimiteDeteccaoVM(sidebar_frame, self.service, self.variaveis)
+
     def botoes(self):
         if not self.botoes_criados:
         # impede recriação de botoes
         # Conectar os botões da View aos métodos da VM
             self.view.selecionar_arquivo_padrao.configure(command=self.padrao)
             self.view.selecionar_amostras.configure(command=self.amostras)
-            self.view.selecionar_fullReport.configure(command=self.report)
             self.view.calcular.configure(command=self.calcular)
             self.botoes_criados = True
 
@@ -94,30 +96,22 @@ class ConcentracaoVM:
             self.texto_arquivos_am.atualizar(nomes_amostras)
         return self.arquivos_amostras
 
-    def report(self):
-        self.limite_deteccao = LimiteDeteccaoVM(self.service, self.variaveis)
-        arquivo_report = self.limite_deteccao.calcula_resultado_limite()
-        if arquivo_report:
-            self.resultado_limite = arquivo_report
-            self._verificar_pronto()
-        return self.resultado_limite
-
     def _verificar_pronto(self):
         """Habilita o botão Calcular quando tudo estiver selecionado."""
-        if self.arquivos_amostras and self.arquivo_padrao and self.resultado_limite:
+        if self.arquivos_amostras and self.arquivo_padrao:
             self.view.calcular.configure(state="normal")
 
     def calcular(self):
         self.c_padrao = self.padrao_vm.c_padrao_lista_selecionado()
         self.resultado = self.model.calcular_concentracoes(self.arquivos_amostras,
                                                            self.arquivo_padrao,
-                                                           self.resultado_limite,
                                                            self.c_padrao)
 
         # Atualiza Variaveis global
         self.variaveis.resultados = self.resultado
         self.variaveis.lista_arquivos = self.arquivos_amostras
         self.variaveis.lista_arquivo_padrao = self.arquivo_padrao
+        self.variaveis.c_padrao = self.c_padrao
 
         # Atualiza a instância dentro de ExportarVM
         self.export.arquivos_amostras = self.variaveis.lista_arquivos
@@ -125,4 +119,5 @@ class ConcentracaoVM:
         if self.resultado:
             self.export.habilita_exporta_excel()
             self.graficos.habilita_graficos()
+            self.limite_deteccao.habilita_limite(self.arquivo_padrao, self.c_padrao)
         return self.resultados_view.mostrar_resultados(self.resultado[0])
