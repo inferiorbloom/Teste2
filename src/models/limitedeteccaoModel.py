@@ -114,6 +114,7 @@ class LimiteDeteccaoModel:
 
         print(area_padrao)
         print(c_padrao)
+        print("Oi, Lucas")
 
         backgrounds = arquivos_fullReport
         limites_area = {}
