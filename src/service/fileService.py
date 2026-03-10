@@ -44,90 +44,81 @@ class Service:
             texto_arquivos_amostras.configure(text="Nenhum arquivo selecionado")
         return arquivos_amostras
 
+
+
     def selecionar_arquivos_fullReport(self):
-        # Abrir diálogo para selecionar o arquivo PDF do FullReport - tem que colocar em um botão para isso, mas por enquanto é só pra testar a função de extração dos backgrounds e cálculo do limite de detecção
-        fullreport = filedialog.askopenfilename(
-            initialdir=self.pasta_pdf,
-            title="Selecione o FullReport",
+
+        fullreports = filedialog.askopenfilenames(
+            title="Selecione os FullReports",
             filetypes=[("FullReports", "*.pdf")]
-            )
+        )
 
-        with pdfplumber.open(fullreport) as pdf:
-            texto = ""
-            for pagina in pdf.pages:
-                texto += pagina.extract_text() + "\n"
+        resultados = {}
 
-        linhas = texto.splitlines()
+        for caminho_pdf in fullreports:
 
-        # IMPORTANTE: estrutura correta
-        backgrounds_raw = defaultdict(lambda: {"K": [], "L": []})
+            with pdfplumber.open(caminho_pdf) as pdf:
+                texto = ""
+                for pagina in pdf.pages:
+                    texto += pagina.extract_text() + "\n"
 
-        elemento_atual = None
-        camada_atual = None
+            linhas = texto.splitlines()
 
-        for i, linha in enumerate(linhas):
+            backgrounds_raw = defaultdict(lambda: {"K": [], "L": []})
 
-            # ----------------------------------------------
-            # Início de elemento (ex: 12Ni K ou 56Ba L)
-            # ----------------------------------------------
-            m_elem = re.match(r"\s*\d+\s*([A-Z][a-z]?)\s+(K|L)\b", linha)
-            if m_elem:
-                elemento_atual = m_elem.group(1)
-                camada_atual = m_elem.group(2)
-                #print(linha)
-                #print(m_elem)
-                continue
+            elemento_atual = None
+            camada_atual = None
 
-            # ----------------------------------------------
-            # Camada K → KA1 / KA2 (exceto Escape)
-            # ----------------------------------------------
-            if elemento_atual and camada_atual == "K":
-                if re.match(r"\s*KA[12]\b(?!\s*Escape)", linha):
-                    if i + 1 < len(linhas):
+            for i, linha in enumerate(linhas):
+
+                m_elem = re.match(r"\s*\d+\s*([A-Z][a-z]?)\s+(K|L)\b", linha)
+                if m_elem:
+                    elemento_atual = m_elem.group(1)
+                    camada_atual = m_elem.group(2)
+                    continue
+
+                if elemento_atual and camada_atual == "K":
+                    if re.match(r"\s*KA[12]\b(?!\s*Escape)", linha):
+                        if i + 1 < len(linhas):
+                            prox = linhas[i + 1]
+                            m_bg = re.search(r"\d+\.\d+\d+\.\d+\s+(\d+)\b", prox)
+                            if m_bg:
+                                bg = int(m_bg.group(1))
+                                backgrounds_raw[elemento_atual]["K"].append(bg)
+
+                if elemento_atual and camada_atual == "L":
+                    m_area = re.search(r"(\d+)\s*±", linha)
+                    if m_area and i + 1 < len(linhas):
                         prox = linhas[i + 1]
                         m_bg = re.search(r"\d+\.\d+\d+\.\d+\s+(\d+)\b", prox)
                         if m_bg:
+                            area = int(m_area.group(1))
                             bg = int(m_bg.group(1))
-                            backgrounds_raw[elemento_atual]["K"].append(bg)
+                            backgrounds_raw[elemento_atual]["L"].append((area, bg))
 
-            # ----------------------------------------------
-            # Camada L → guardar (área, background)
-            # ----------------------------------------------
-            if elemento_atual and camada_atual == "L":
-                m_area = re.search(r"(\d+)\s*±", linha)
-                if m_area and i + 1 < len(linhas):
-                    prox = linhas[i + 1]
-                    m_bg = re.search(r"\d+\.\d+\d+\.\d+\s+(\d+)\b", prox)
-                    if m_bg:
-                        area = int(m_area.group(1))
-                        bg = int(m_bg.group(1))
-                        backgrounds_raw[elemento_atual]["L"].append((area, bg))
+            backgrounds = {}
 
-        # ======================================================
-        # Decisão final por elemento
-        # ======================================================
-        backgrounds = {}
+            for elemento, dados in backgrounds_raw.items():
 
-        for elemento, dados in backgrounds_raw.items():
+                if dados["K"]:
+                    if len(dados["K"]) == 1:
+                        backgrounds[elemento] = dados["K"][0]
+                    else:
+                        backgrounds[elemento] = round(sum(dados["K"]) / len(dados["K"]))
 
-            # Prioridade: camada K
-            if dados["K"]:
-                if len(dados["K"]) == 1:
-                    backgrounds[elemento] = dados["K"][0]
-                else:
-                    backgrounds[elemento] = round(sum(dados["K"]) / len(dados["K"]))
+                elif dados["L"]:
+                    dados_L_ordenados = sorted(dados["L"], key=lambda x: x[0], reverse=True)
 
-            # Caso não tenha K, usa L (linha dominante)
-            elif dados["L"]:
-                # ordena por área (maior → menor)
-                dados_L_ordenados = sorted(dados["L"], key=lambda x: x[0], reverse=True)
+                    if len(dados_L_ordenados) >= 2:
+                        bg1 = dados_L_ordenados[0][1]
+                        bg2 = dados_L_ordenados[1][1]
+                        backgrounds[elemento] = round((bg1 + bg2) / 2)
+                    else:
+                        backgrounds[elemento] = dados_L_ordenados[0][1]
 
-                # pega as duas maiores áreas
-                if len(dados_L_ordenados) >= 2:
-                    bg1 = dados_L_ordenados[0][1]
-                    bg2 = dados_L_ordenados[1][1]
-                    backgrounds[elemento] = round((bg1 + bg2) / 2)
-                else:
-                    # só uma linha L disponível
-                    backgrounds[elemento] = dados_L_ordenados[0][1]
-        return backgrounds
+            resultados[caminho_pdf] = backgrounds
+        #print("Resultados dos FullReports:")
+        #print(resultados)
+       # print("=================================")
+
+        return resultados
