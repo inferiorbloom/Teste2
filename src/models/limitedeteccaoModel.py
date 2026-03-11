@@ -16,9 +16,9 @@ class LimiteDeteccaoModel:
         # reorganiza as concentrações
         concentracoes = self.reorganizar_concentracoes(concentracoes)
 
-        print("Concentrações reorganizadas:")
-        print(concentracoes)
-        print("=================================")
+        #print("Concentrações reorganizadas:")
+        #print(concentracoes)
+        #print("=================================")
 
         limites = {}
 
@@ -47,7 +47,7 @@ class LimiteDeteccaoModel:
                     ld = (conc * limite_area) / area_norm
                     ld_resultado[nome][elemento] = ld
 
-        print(ld_resultado)
+        #print(ld_resultado)
        
         return ld_resultado
 
