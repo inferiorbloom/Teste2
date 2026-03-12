@@ -25,8 +25,21 @@ class LimiteDeteccaoVM:
         return self.arquivo_padrao, self.c_padrao
 
     def calcula_resultado_limite(self):
+
         self.arquivos_fullReport = self.service.selecionar_arquivos_fullReport()
-        self.resultado_limite = self.limitedeteccao_model.calcular_limite_deteccao(self.arquivos_fullReport, self.arquivo_padrao, self.c_padrao)
+
+        concentracoes = self.variaveis.resultados[0]
+        areas_normalizadas = self.variaveis.resultados[1]
+
+        self.resultado_limite = self.limitedeteccao_model.calcular_limite_deteccao(
+            self.arquivos_fullReport,
+            self.arquivo_padrao,
+            self.c_padrao,
+            areas_normalizadas,
+            concentracoes
+        )
+
         self.variaveis.resultado_limite = self.resultado_limite
 
         return self.variaveis.resultado_limite
+
