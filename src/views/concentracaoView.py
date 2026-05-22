@@ -15,12 +15,12 @@ class ConcentracaoView(ctk.CTkFrame):
         self.label_select.pack(pady=10, fill="x", padx=20)
 
         self.selecionar_arquivo_padrao = ctk.CTkButton(
-            self, text="Selecionar Arquivo Padrão", image=icone_file, compound="left", font=("Arial", 12)
+            self, text="Arquivo Padrão", image=icone_file, compound="left", font=("Arial", 12)
         )
         self.selecionar_arquivo_padrao.pack(pady=10, fill="x", padx=20)
 
         self.selecionar_amostras = ctk.CTkButton(
-            self, text="Selecionar Amostras", image=icone_pasta, compound="left", font=("Arial", 12)
+            self, text="Amostras", image=icone_pasta, compound="left", font=("Arial", 12)
         )
         self.selecionar_amostras.pack(pady=10, fill="x", padx=20)
 
@@ -34,11 +34,28 @@ class ConcentracaoView(ctk.CTkFrame):
             state="disabled",
             fg_color="#0D740F",
             text_color="#FFFFFF",
-            command="",
+            command=None,
             image=icone_calcular,
             compound="left",
         )
         self.calcular.pack(pady=10, fill="x", padx=20)
+
+
+        icone_lista = ctk.CTkImage(light_image=Image.open("imagens/icones/lista.png"), size=(20, 20))
+
+        self.botao_limite = ctk.CTkButton(
+            self,
+            state="enabled",
+            image=icone_lista,
+            text="Limite de Detecção",
+            font=("Arial", 12),
+            command=None,
+            compound="left"
+        )
+        self.botao_limite.pack(pady=10, fill="x", padx=20)
+
+
+
 
 class ConcentracaoResultadoView(ctk.CTkFrame):
     def __init__(self, master):
@@ -97,3 +114,7 @@ class AttArquivoSelecionado(ctk.CTkFrame):
 
     def atualizar(self, texto):
         self.label.configure(text=texto)
+
+
+
+

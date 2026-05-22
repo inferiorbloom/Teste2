@@ -1,12 +1,14 @@
 import os
 from views.concentracaoView import ConcentracaoView, ConcentracaoResultadoView, AttArquivoSelecionado
 from models.concentracaoModel import ConcentracaoModel
+from models.propagacaoErrosModel import PropagacaoErrosModel
 from service.fileService import Service
 from store.variaveis import Variaveis
 from viewmodels.exportarVM import ExportarVM
 from viewmodels.padraoVM import PadraoVM
 from viewmodels.graficosVM import GraficosVM
 from viewmodels.limiteDeteccaoVM import LimiteDeteccaoVM
+
 
 
 class ConcentracaoVM:
@@ -17,7 +19,7 @@ class ConcentracaoVM:
                 amostras_frame,
                 dynamic_frame,
                 mostrar_tela_inicial):
-
+        
         self.sidebar_frame = sidebar_frame
         self.result_frame = result_frame
         self.arquivos_frame = arquivo_frame
@@ -25,6 +27,7 @@ class ConcentracaoVM:
         self.dynamic_frame = dynamic_frame
         self.mostrar_tela_inicial = mostrar_tela_inicial
         self.botoes_criados = False
+        self.erro_model = PropagacaoErrosModel()
 
         # Variáveis para armazenar arquivos selecionados
         self.variaveis = Variaveis(sidebar_frame)
@@ -75,6 +78,7 @@ class ConcentracaoVM:
             self.view.selecionar_arquivo_padrao.configure(command=self.padrao)
             self.view.selecionar_amostras.configure(command=self.amostras)
             self.view.calcular.configure(command=self.calcular)
+            self.view.botao_limite.configure(command=self.limite_deteccao.calcula_resultado_limite, state="disabled")
             self.botoes_criados = True
 
     def padrao(self):
@@ -106,12 +110,36 @@ class ConcentracaoVM:
         self.resultado = self.model.calcular_concentracoes(self.arquivos_amostras,
                                                            self.arquivo_padrao,
                                                            self.c_padrao)
+        if not self.resultado:
+            return
+        self.concentracoes = self.resultado[0]
+        self.areas_normalizadas = self.resultado[1]
+        self.fatores_normalizacao = self.resultado[2]
+        self.erros_normalizados = self.resultado[3]
+        self.area_padrao = self.resultado[4]
+        self.erro_padrao = self.resultado[5]
+
+
+
+        # calcula propagação de erro
+        self.erros_concentracao, self.unidade_padrao = self.erro_model.calcular(
+            self.concentracoes,
+            self.areas_normalizadas,
+            self.erros_normalizados,
+            self.c_padrao,
+            self.area_padrao,
+            self.erro_padrao
+        )
+
+
 
         # Atualiza Variaveis global
-        self.variaveis.resultados = self.resultado
         self.variaveis.lista_arquivos = self.arquivos_amostras
         self.variaveis.lista_arquivo_padrao = self.arquivo_padrao
         self.variaveis.c_padrao = self.c_padrao
+        self.variaveis.resultados = self.resultado
+        self.variaveis.erros_concentracao = self.erros_concentracao
+        self.variaveis.unidade_padrao = self.unidade_padrao
 
         # Atualiza a instância dentro de ExportarVM
         self.export.arquivos_amostras = self.variaveis.lista_arquivos
@@ -120,4 +148,5 @@ class ConcentracaoVM:
             self.export.habilita_exporta_excel()
             self.graficos.habilita_graficos()
             self.limite_deteccao.habilita_limite(self.arquivo_padrao, self.c_padrao)
+            self.view.botao_limite.configure(state="normal")
         return self.resultados_view.mostrar_resultados(self.resultado[0])

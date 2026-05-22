@@ -40,20 +40,29 @@ class PadraoView(ctk.CTkFrame):
         self.botao_gerenciar = self.gerenciar_padraovm.botao_gerenciar()
 
         # Define o valor inicial apenas visualmente
-        self.combobox.set(nomes[0])
-        self.selecionado = self.lista_dados[0]
-        return self.selecionado
+        if nomes:
+            self.combobox.set(nomes[0])
+            self.selecionado = self.lista_dados[0]
+            return self.selecionado
+        else:
+            self.combobox.set("Nenhum padrão")
+            self.selecionado = None
+            return None
 
     def ao_selecionar(self, escolha):
         self.selecionado = next((item for item in self.lista_dados if item["nome"] == escolha), None)
         if self.selecionado:
-            print(f"Padrão selecionado em Pd_VIEW (def selecionar): {escolha}")
-            print("Elementos em Pd_VIEW (def selecionar):", self.selecionado["elementos"])
+            #print(f"Padrão selecionado em Pd_VIEW (def selecionar): {escolha}")
+            #print("Elementos em Pd_VIEW (def selecionar):", self.selecionado["elementos"])
+            print("Deu bom")
             return self.selecionado
         else:
             print("Nenhum padrão encontrado.")
 
     def atualizar_lista(self, nova_lista):
+        if not hasattr(self, "combobox"):
+                return
+       
         """Atualiza a ComboBox após salvar novos padrões no JSON"""
         self.lista_dados = nova_lista
         nomes = [item["nome"] for item in nova_lista]

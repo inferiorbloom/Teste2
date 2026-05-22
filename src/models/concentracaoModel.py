@@ -17,6 +17,7 @@ class ConcentracaoModel:
 
         c_padrao = c_padrao["elementos"]
 
+
         # Dicionário dos elementos químicos
         elementos = {
             12: "Mg",
@@ -125,6 +126,7 @@ class ConcentracaoModel:
             doc["linhas"] = [[float(x.strip()) for x in linha.split(",")] for linha in conteudo]
 
         area_padrao = {}
+        erro_padrao = {}
         # Lê área do padrão
 
         with open(lista_arquivo_padrao, "r", encoding="utf-8") as p:
@@ -135,8 +137,10 @@ class ConcentracaoModel:
                     try:
                         z = int(valores[0])
                         area = float(valores[2])
+                        erro = float(valores[3])
                         elemento = elementos.get(z, "-")
                         area_padrao[elemento] = area
+                        erro_padrao[elemento] = erro
                     except (ValueError, IndexError):
                         continue
 
@@ -146,6 +150,8 @@ class ConcentracaoModel:
         # dicionario para guardar os fatores de normalização
         fatores_normalizacao = {}
         areas_normalizadas = {}
+        erros_normalizados = {}
+        
 
         # calcula o fator para cada amostra (baseado no ar)
         for i, (doc_nome, info) in enumerate(documentos.items(), start=1):
@@ -166,22 +172,38 @@ class ConcentracaoModel:
             nome_amostra = list(concentracoes[f"concentracao{i}"].keys())[0]
             fator = fatores_normalizacao.get(nome_amostra, 1)  # usa 1 se não houver fator (sem normalização)
             areas_normalizadas[nome_amostra] = {}
+            erros_normalizados[nome_amostra] = {}
 
             for linha in info["linhas"]:
                 num = linha[0]  # número do elemento
                 area_net = linha[2]  # área líquida medida
+                erro_area = linha[3]  # erro da área medida
                 elemento = elementos[num]
 
                 # aplica normalização na área antes do cálculo
                 area_net_normalizada = area_net * fator
+                erro_normalizado = erro_area * fator
                 areas_normalizadas[nome_amostra][elemento] = area_net_normalizada
+                erros_normalizados[nome_amostra][elemento] = round(erro_normalizado, 0)
+
+            
+               
+
 
                 # Calcula concentração apenas se o elemento estiver nos padrões
                 if elemento in c_padrao and elemento in area_padrao:
-                    conc = (area_net_normalizada * c_padrao[elemento]) / area_padrao[elemento]
+
+                    valor_padrao = c_padrao[elemento]["valor"]
+
+                    conc = (area_net_normalizada * valor_padrao) / area_padrao[elemento]
                     conc = f"{conc:.3f}"
+
                     concentracoes[f"concentracao{i}"][nome_amostra][elemento] = conc
 
-        return [concentracoes, areas_normalizadas]
+        #print("Concentrações calculadas:", concentracoes)
+        #print("Erros normalizados:", erros_normalizados)
+        #print("print no concentracaoModel")
+        #print("Erros dos padrões:", area_padrao, "------",erro_padrao)
+        return [concentracoes, areas_normalizadas, fatores_normalizacao, erros_normalizados, area_padrao, erro_padrao]
 
 
