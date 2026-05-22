@@ -28,13 +28,13 @@ class LimiteDeteccaoModel:
 
             for elemento, bg in backgrounds.items():
 
-                limites_area[elemento] = round(3 * math.sqrt(bg))
+                limites_area[elemento] = 3 * math.sqrt(bg)
 
             limites[arquivo] = limites_area
 
         ld_resultado = {}
         for arquivo, elementos in limites.items():
-            nome = os.path.basename(arquivo).replace(".pdf", "")
+            nome = os.path.basename(arquivo).replace(".pdf", "").strip()
             ld_resultado[nome] = {}
 
             for elemento, limite_area in elementos.items():
@@ -46,8 +46,17 @@ class LimiteDeteccaoModel:
 
                     ld = (conc * limite_area) / area_norm
                     ld_resultado[nome][elemento] = ld
-
+        #print("areas normalizadas:", areas_normalizadas)
+        #print("------------------------------")
+        #print("Concentrações:", concentracoes)
+        #print("------------------------------")
+        #print("Limites de detecção calculados:", ld_resultado)
+        #print("Backgrounds:", backgrounds)
+        #print("Backgrounds:", arquivos_fullReport)
+        #print("------------------------------")
+        #print("Limites de detecção área:", limites[arquivo])
         #print(ld_resultado)
+    
        
         return ld_resultado
 

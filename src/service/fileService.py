@@ -119,6 +119,6 @@ class Service:
             resultados[caminho_pdf] = backgrounds
         #print("Resultados dos FullReports:")
         #print(resultados)
-       # print("=================================")
+        #print("=================================")
 
         return resultados
