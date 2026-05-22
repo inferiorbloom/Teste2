@@ -1,4 +1,4 @@
-from models.limiteDeteccaoModel import LimiteDeteccaoModel
+from models.limitedeteccaoModel import LimiteDeteccaoModel
 from views.limiteDeteccaoView import LimiteDeteccaoView
 
 
