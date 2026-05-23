@@ -243,7 +243,7 @@ class ExportarModel:
             todos_dados.append(["", "", "", "", "", "", "", ""])
 
         df_dados = pd.DataFrame(todos_dados)
-
+        df_dados = df_dados.replace(r'^\s*$', '-', regex=True).fillna('-')
 
         # --- Exportação da análise (Resultados) ---
         analise = {}
@@ -330,9 +330,9 @@ class ExportarModel:
 
             df_analise = pd.DataFrame.from_dict(linhas, orient="index")
             df_analise = df_analise.reindex(columns=pd.MultiIndex.from_tuples(colunas))
-
-
             df_analise.index = list(linhas.keys())
+
+            df_analise = df_analise.replace(r'^\s*$', '-', regex=True).fillna('-')
 
         else:
             df_analise = pd.DataFrame()
@@ -341,6 +341,8 @@ class ExportarModel:
 
         df_concentracoes = df_analise.xs("C", axis=1, level=1)
         df_concentracoes.columns.name = None
+
+        df_concentracoes = df_concentracoes.replace(r'^\s*$', '-', regex=True).fillna('-')
 
         os.makedirs("tabela-excel", exist_ok=True)
         caminho_arquivo = os.path.join("tabela-excel", "amostras.xlsx")
@@ -369,7 +371,7 @@ class ExportarModel:
                 worksheet = writer.sheets["Resultados"]
 
                 # escreve "LD" na primeira coluna
-                worksheet.write(1, 0, "LD")
+                #worksheet.write(1, 0, "LD")
 
                 col = 1
 
@@ -383,22 +385,24 @@ class ExportarModel:
                         titulo = elemento
 
                     # linha 0 -> elemento
-                    worksheet.merge_range(0, col, 0, col + 1, titulo)
+                    #worksheet.merge_range(0, col, 0, col + 1, titulo)
 
                     # linha 1 -> valor do LD
                     ld = ""
                     if ld_resultado:
                         ld_bruto = ld_resultado.get(nome_padrao, {}).get(elemento, "")
                         ld = self.formatar_ld(ld_bruto)
+                        if ld == "":
+                            ld = "-"
 
-                    worksheet.merge_range(1, col, 1, col + 1, ld)
+                    #worksheet.merge_range(1, col, 1, col + 1, ld)
 
                     # linha 2 -> C / Erro
-                    worksheet.write(2, col, "C")
-                    worksheet.write(2, col + 1, "Erro")
+                    #worksheet.write(2, col, "C")
+                    #worksheet.write(2, col + 1, "Erro")
 
                     col += 2
-        
+
         try:
             _salvar_excel(caminho_arquivo)
         except PermissionError:
@@ -407,11 +411,8 @@ class ExportarModel:
             caminho_arquivo = os.path.join("tabela-excel", f"amostras_{timestamp}.xlsx")
             _salvar_excel(caminho_arquivo)
 
-
-
         print("Exportacao concluida!")
         self.mostrar_popup_sucesso(caminho_arquivo)
-
 
     def mostrar_popup_sucesso(self, caminho_arquivo):
         popup = ctk.CTkToplevel()

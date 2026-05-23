@@ -40,7 +40,6 @@ class ConcentracaoView(ctk.CTkFrame):
         )
         self.calcular.pack(pady=10, fill="x", padx=20)
 
-
         icone_lista = ctk.CTkImage(light_image=Image.open("imagens/icones/lista.png"), size=(20, 20))
 
         self.botao_limite = ctk.CTkButton(
@@ -53,9 +52,6 @@ class ConcentracaoView(ctk.CTkFrame):
             compound="left"
         )
         self.botao_limite.pack(pady=10, fill="x", padx=20)
-
-
-
 
 class ConcentracaoResultadoView(ctk.CTkFrame):
     def __init__(self, master):
@@ -97,7 +93,7 @@ class ConcentracaoResultadoView(ctk.CTkFrame):
                 )
                 # valores por elemento
                 for col, elemento in enumerate(todos_elementos, start=1):
-                    valor = elementos.get(elemento, "-")
+                    valor = elementos.get(elemento, "---")
                     ctk.CTkLabel(self.scroll, text=str(valor), font=("Arial", 14)).grid(
                         row=row, column=col, padx=10, pady=5
                     )
