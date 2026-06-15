@@ -37,9 +37,10 @@ class PropagacaoErrosModel:
                     Ap = area_padrao[el]
                     eAp = erro_padrao[el]
 
-                    Cp = c_p[el]
-                    eCp = e_p[el]
+                    elemento = el[0]  # pega só "Ag"
 
+                    Cp = c_p[elemento]
+                    eCp = e_p[elemento]
 
                     termos = []
 
