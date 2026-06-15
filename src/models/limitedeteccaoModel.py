@@ -3,6 +3,23 @@ import os
 
 class LimiteDeteccaoModel:
 
+    def _buscar_valor_por_elemento(self, dados, nome_amostra, elemento):
+        if not isinstance(dados, dict):
+            return None
+
+        amostra_dados = dados.get(nome_amostra)
+        if not isinstance(amostra_dados, dict):
+            return None
+
+        if elemento in amostra_dados:
+            return amostra_dados[elemento]
+
+        for chave, valor in amostra_dados.items():
+            if isinstance(chave, tuple) and chave and chave[0] == elemento:
+                return valor
+
+        return None
+
     def calcular_limite_deteccao(self, arquivos_fullReport, arquivo_padrao, c_padrao, areas_normalizadas, concentracoes):
 
       #  print("Será que os arquivos estão chegando corretamente?")
@@ -39,12 +56,17 @@ class LimiteDeteccaoModel:
 
             for elemento, limite_area in elementos.items():
 
-                area_norm = areas_normalizadas.get(nome, {}).get(elemento)
-                conc = concentracoes.get(nome, {}).get(elemento)
+                area_norm = self._buscar_valor_por_elemento(areas_normalizadas, nome, elemento)
+                conc = self._buscar_valor_por_elemento(concentracoes, nome, elemento)
 
-                if area_norm and conc:
+                if area_norm not in [None, "", 0] and conc not in [None, "", 0]:
+                    try:
+                        conc_valor = float(conc)
+                        area_norm_valor = float(area_norm)
+                    except (TypeError, ValueError):
+                        continue
 
-                    ld = (conc * limite_area) / area_norm
+                    ld = (conc_valor * limite_area) / area_norm_valor
                     ld_resultado[nome][elemento] = ld
         #print("areas normalizadas:", areas_normalizadas)
         #print("------------------------------")

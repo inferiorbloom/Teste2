@@ -3,7 +3,7 @@ import os
 import customtkinter as ctk
 import math
 import numpy as np
-
+from collections import Counter
 
 class ExportarModel:
 
@@ -52,6 +52,16 @@ class ExportarModel:
 
         return round(ld, casas)
 
+    def montar_titulo_coluna(self, elemento, energia, unidade, possui_duplicata):
+        if possui_duplicata:
+            if unidade:
+                return f"{elemento} ({energia:.3f} keV, {unidade})"
+            return f"{elemento} ({energia:.3f} keV)"
+
+        if unidade:
+            return f"{elemento} ({unidade})"
+
+        return elemento
 
     def exportar_para_excel(
         self,
@@ -213,9 +223,11 @@ class ExportarModel:
                         erro = float(valores[3]) if valores[3] else 0
 
                         erro_percent = (erro / area) * 100 if area != 0 else 0
+                        chave = (nome_elemento, round(energia, 3))
 
-                        area_norm = areas_normalizadas.get(nome_amostra, {}).get(nome_elemento, "")
-                        erro_norm = erros_normalizados.get(nome_amostra, {}).get(nome_elemento, "")
+
+                        area_norm = areas_normalizadas.get(nome_amostra, {}).get(chave, "")
+                        erro_norm = erros_normalizados.get(nome_amostra, {}).get(chave, "")
 
                         if area_norm != "":
                             try:
@@ -243,7 +255,7 @@ class ExportarModel:
             todos_dados.append(["", "", "", "", "", "", "", ""])
 
         df_dados = pd.DataFrame(todos_dados)
-        df_dados = df_dados.replace(r'^\s*$', '-', regex=True).fillna('-')
+
 
         # --- Exportação da análise (Resultados) ---
         analise = {}
@@ -268,17 +280,26 @@ class ExportarModel:
                         analise[nome_amostra][elemento]["Erro"] = erro
 
         if analise:
-            elementos_ordenados = [elementos[z] for z in elementos
-                                   if elementos[z] in elementos_encontrados]
+            elementos_ordenados = sorted(elementos_encontrados, key=lambda x: (x[0], x[1]))  # ordena por símbolo e energia)
+            contagem_elementos = Counter(elemento for elemento, energia in elementos_ordenados)
+            
             colunas = []
-            for elemento in elementos_ordenados:
-                colunas.append((elemento, "C"))
-                colunas.append((elemento, "Erro"))
+            for elemento, energia in elementos_ordenados:
+                unidade = unidade_padrao.get(elemento, "")
+                possui_duplicata = contagem_elementos[elemento] > 1
+                nome_coluna = self.montar_titulo_coluna(elemento, energia, unidade, possui_duplicata)
+
+                colunas.append((nome_coluna, "C"))
+                colunas.append((nome_coluna, "Erro"))
 
             linhas = {}
             for nome_amostra, elementos in analise.items():
                 linha = {}
                 for elemento in elementos_ordenados:
+                    unidade = unidade_padrao.get(elemento[0], "")
+                    possui_duplicata = contagem_elementos[elemento[0]] > 1
+                    nome_coluna = self.montar_titulo_coluna(elemento[0], elemento[1], unidade, possui_duplicata)
+                                                      
                     c_col = "C"
                     e_col = "Erro"
                     valor = elementos.get(elemento, {}).get("C", "")
@@ -311,20 +332,22 @@ class ExportarModel:
                                     valor_str = f"{valor_fmt:.{casas}f}"
                                     erro_str = f"{erro_fmt:.{casas}f}"
 
-                                    linha[(elemento, c_col)] = valor_str
-                                    linha[(elemento, e_col)] = erro_str
+                                    #nome_coluna = f"{elemento[0]} ({elemento[1]:.3f} keV)"
+
+                                    linha[(nome_coluna, c_col)] = valor_str
+                                    linha[(nome_coluna, e_col)] = erro_str
 
                                 else:
-                                    linha[(elemento, c_col)] = valor_fmt
-                                    linha[(elemento, e_col)] = erro_fmt
+                                    linha[(nome_coluna, c_col)] = valor_fmt
+                                    linha[(nome_coluna, e_col)] = erro_fmt
                             else:
                                 valor_fmt = round(valor_num)  # 👈 arredondamento simples
-                                linha[(elemento, c_col)] = valor_fmt
-                                linha[(elemento, e_col)] = ""
+                                linha[(nome_coluna, c_col)] = valor_fmt
+                                linha[(nome_coluna, e_col)] = ""
 
                         except Exception:
-                            linha[(elemento, c_col)] = valor
-                            linha[(elemento, e_col)] = erro
+                            linha[(nome_coluna, c_col)] = valor
+                            linha[(nome_coluna, e_col)] = erro
 
                 linhas[nome_amostra] = linha
 
@@ -358,7 +381,6 @@ class ExportarModel:
                     index_label="Amostra"
                 )
 
-               # escreve dataframe sem cabeçalho
                 df_analise.to_excel(
                     writer,
                     sheet_name="Resultados",
@@ -367,39 +389,60 @@ class ExportarModel:
                     startrow=2
                 )
 
-                workbook = writer.book
                 worksheet = writer.sheets["Resultados"]
 
-                # escreve "LD" na primeira coluna
-                #worksheet.write(1, 0, "LD")
+                # Cabeçalho linha 0
+                worksheet.write(0, 0, "")
+
+                # Cabeçalho linha 1
+                worksheet.write(1, 0, "LD")
+
+                # Cabeçalho linha 2
+                worksheet.write(2, 0, "")
 
                 col = 1
 
-                for elemento in elementos_ordenados:
+
+                for elemento, energia in elementos_ordenados:
 
                     unidade = unidade_padrao.get(elemento, "")
+                    possui_duplicata = contagem_elementos[elemento] > 1
+                    titulo = self.montar_titulo_coluna(elemento, energia, unidade, possui_duplicata)
 
-                    if unidade:
-                        titulo = f"{elemento} ({unidade})"
-                    else:
-                        titulo = elemento
+                    # Linha 0 -> nome do elemento + unidade
+                    worksheet.merge_range(
+                        0,
+                        col,
+                        0,
+                        col + 1,
+                        titulo
+                    )
 
-                    # linha 0 -> elemento
-                    #worksheet.merge_range(0, col, 0, col + 1, titulo)
+                    # Busca LD
+                    ld = "-"
 
-                    # linha 1 -> valor do LD
-                    ld = ""
                     if ld_resultado:
-                        ld_bruto = ld_resultado.get(nome_padrao, {}).get(elemento, "")
-                        ld = self.formatar_ld(ld_bruto)
-                        if ld == "":
-                            ld = "-"
+                        ld_bruto = (
+                            ld_resultado
+                            .get(nome_padrao, {})
+                            .get(elemento, "")
+                        )
 
-                    #worksheet.merge_range(1, col, 1, col + 1, ld)
+                        if ld_bruto not in ["", None]:
+                            ld = self.formatar_ld(ld_bruto)
 
-                    # linha 2 -> C / Erro
-                    #worksheet.write(2, col, "C")
-                    #worksheet.write(2, col + 1, "Erro")
+                    # Linha 1 -> LD
+                    worksheet.merge_range(
+                        1,
+                        col,
+                        1,
+                        col + 1,
+                        ld
+                    )
+
+                    # Linha 2 -> C / Erro
+                    worksheet.write(2, col, "C")
+                    worksheet.write(2, col + 1, "Erro")
 
                     col += 2
 
