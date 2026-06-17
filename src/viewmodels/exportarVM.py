@@ -1,6 +1,6 @@
 from views.exportarView import ExportarView
 from models.exportarModel import ExportarModel
-
+from tkinter import filedialog
 
 class ExportarVM:
     def __init__(self, master, variaveis):
@@ -20,6 +20,23 @@ class ExportarVM:
         self.export.exportar_botao.configure(state="normal")
 
     def exporta_excel(self):
+        # Abre a caixa de diálogo para o usuário escolher onde salvar o arquivo Excel
+        caminho_arquivo = filedialog.asksaveasfilename(
+            title="Salvar planilha Excel",
+            defaultextension=".xlsx",
+            filetypes=[
+                ("Planilhas Excel", "*.xlsx"),
+                ("Todos os arquivos", "*.*")
+            ],
+            initialfile="amostras.xlsx"
+        )   
+
+        # usuário cancelou
+        if not caminho_arquivo:
+            return
+        
+        
+        
         # Obtem as variáveis atualizadas no fluxo principal
         arquivo_padrao = self.variaveis.lista_arquivo_padrao
 
@@ -47,5 +64,6 @@ class ExportarVM:
             ld_resultado,
             unidade_padrao,
             arquivo_padrao,
+            caminho_arquivo,
         )
         return self.exporta_excel_var

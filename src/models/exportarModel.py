@@ -74,6 +74,7 @@ class ExportarModel:
         ld_resultado=None,
         unidade_padrao=None,
         arquivo_padrao=None,
+        caminho_arquivo=None,
     ):
         arquivos = lista_arquivos or []
         concentracoes = concentracoes or {}
@@ -86,12 +87,12 @@ class ExportarModel:
         arquivo_padrao = arquivo_padrao or ""
         nome_padrao = os.path.basename(arquivo_padrao).replace(".txt", "")
 
-        print("-------------------------")
-        print(arquivo_padrao)
-        print("-------------------------")
-        print(nome_padrao)
-        print("-------------------------")
-        print(ld_resultado)
+        #print("-------------------------")
+        #print(arquivo_padrao)
+        #print("-------------------------")
+        #print(nome_padrao)
+        #print("-------------------------")
+        #print(ld_resultado)
 
 
         elementos = {
@@ -366,12 +367,22 @@ class ExportarModel:
         df_concentracoes.columns.name = None
 
         df_concentracoes = df_concentracoes.replace(r'^\s*$', '-', regex=True).fillna('-')
-
-        os.makedirs("tabela-excel", exist_ok=True)
-        caminho_arquivo = os.path.join("tabela-excel", "amostras.xlsx")
+        
+        # Se o usuário não escolheu um local para salvar, salva na pasta do programa
+        if not caminho_arquivo:
+            os.makedirs("tabela-excel", exist_ok=True)
+            caminho_arquivo = os.path.join("tabela-excel", "amostras.xlsx")
 
         def _salvar_excel(path):
-            with pd.ExcelWriter(path) as writer:
+            with pd.ExcelWriter(
+                path,
+                engine="xlsxwriter",
+                engine_kwargs={
+                    "options": {
+                        "strings_to_numbers": True
+                    }
+                }
+            ) as writer:
                 df_dados.to_excel(writer, sheet_name="Dados", index=False, header=False)
 
                 df_concentracoes.to_excel(
