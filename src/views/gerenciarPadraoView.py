@@ -314,9 +314,7 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
     # -------------------------
     # CARREGAR PADRÃO
     # -------------------------
-
     def carregar_padrao(self, nome):
-
         padrao = next((p for p in self.padroes if p["nome"] == nome), None)
 
         if not padrao:
@@ -326,22 +324,28 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
         self.entry_nome.insert(0, padrao["nome"])
 
         for elemento in self.elementos:
-
             campos = self.entries[elemento]
 
+            # Limpa os campos antes de preencher
             campos["valor"].delete(0, "end")
             campos["erro"].delete(0, "end")
-            campos["unidade"].set("mg/kg")
+            
+            # Valor padrão caso não exista no JSON
+            campos["unidade"].set("mg/kg") 
 
             if elemento in padrao["elementos"]:
-
                 dados = padrao["elementos"][elemento]
 
+                # Recupera os valores numéricos ou strings
                 valor_str = dados.get("valor_str")
                 valor = dados.get("valor")
-
                 erro_str = dados.get("erro_str")
                 erro = dados.get("erro")
+                
+                # --- AQUI ESTA A CORREÇÃO PARA A UNIDADE ---
+                unidade_salva = dados.get("unidade", "mg/kg")
+                campos["unidade"].set(unidade_salva)
+                # -------------------------------------------
 
                 valor_final = valor_str if valor_str is not None else ("" if valor is None else str(valor))
                 erro_final = erro_str if erro_str is not None else ("" if erro is None else str(erro))
