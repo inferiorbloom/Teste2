@@ -7,14 +7,16 @@ import pdfplumber
 import re
 from collections import defaultdict
 
+from resource_utils import resource_path
+
 
 class Service:
     def __init__(self, master):
         super().__init__()
         self.master = master
 
-        self.pasta_txt = r"aquisicoes"
-        self.pasta_pdf = r"reports"
+        self.pasta_txt = resource_path("aquisicoes")
+        self.pasta_pdf = resource_path("reports")
 
     # Função para selecionar arquivo padrão
     def selecionar_arquivo_padrao(self):

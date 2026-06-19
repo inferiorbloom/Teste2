@@ -1,15 +1,26 @@
 import customtkinter as ctk
 from PIL import Image
 
+from resource_utils import resource_path
+
 
 class ConcentracaoView(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
         # Carregando ícone
-        icone_pasta = ctk.CTkImage(light_image=Image.open("imagens/icones/pasta.png"), size=(20, 20))
-        icone_file = ctk.CTkImage(light_image=Image.open("imagens/icones/file.png"), size=(20, 20))
-        icone_calcular = ctk.CTkImage(light_image=Image.open("imagens/icones/calcular.png"), size=(20, 20))
+        icone_pasta = ctk.CTkImage(
+            light_image=Image.open(resource_path("imagens", "icones", "pasta.png")),
+            size=(20, 20),
+        )
+        icone_file = ctk.CTkImage(
+            light_image=Image.open(resource_path("imagens", "icones", "file.png")),
+            size=(20, 20),
+        )
+        icone_calcular = ctk.CTkImage(
+            light_image=Image.open(resource_path("imagens", "icones", "calcular.png")),
+            size=(20, 20),
+        )
 
         self.label_select = ctk.CTkLabel(self, text="Selecione os arquivos:", font=("Arial", 14, "bold"))
         self.label_select.pack(pady=10, fill="x", padx=20)
@@ -40,7 +51,10 @@ class ConcentracaoView(ctk.CTkFrame):
         )
         self.calcular.pack(pady=10, fill="x", padx=20)
 
-        icone_lista = ctk.CTkImage(light_image=Image.open("imagens/icones/lista.png"), size=(20, 20))
+        icone_lista = ctk.CTkImage(
+            light_image=Image.open(resource_path("imagens", "icones", "lista.png")),
+            size=(20, 20),
+        )
 
         self.botao_limite = ctk.CTkButton(
             self,
