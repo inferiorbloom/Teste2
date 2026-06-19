@@ -5,6 +5,8 @@ import math
 import numpy as np
 from collections import Counter
 
+from resource_utils import ensure_directory, user_data_path
+
 class ExportarModel:
 
     def formatar_valor_erro(self, valor, erro):
@@ -368,10 +370,10 @@ class ExportarModel:
 
         df_concentracoes = df_concentracoes.replace(r'^\s*$', '-', regex=True).fillna('-')
         
-        # Se o usuário não escolheu um local para salvar, salva na pasta do programa
+        # Se o usuário não escolheu um local para salvar, salva em um diretório gravável pelo usuário
         if not caminho_arquivo:
-            os.makedirs("tabela-excel", exist_ok=True)
-            caminho_arquivo = os.path.join("tabela-excel", "amostras.xlsx")
+            pasta_saida = ensure_directory(user_data_path("exports"))
+            caminho_arquivo = os.path.join(pasta_saida, "amostras.xlsx")
 
         def _salvar_excel(path):
             with pd.ExcelWriter(
@@ -462,7 +464,8 @@ class ExportarModel:
         except PermissionError:
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            caminho_arquivo = os.path.join("tabela-excel", f"amostras_{timestamp}.xlsx")
+            pasta_saida = ensure_directory(user_data_path("exports"))
+            caminho_arquivo = os.path.join(pasta_saida, f"amostras_{timestamp}.xlsx")
             _salvar_excel(caminho_arquivo)
 
         print("Exportacao concluida!")

@@ -4,6 +4,8 @@ import json
 from tkinter import messagebox
 import winsound
 
+from resource_utils import resource_path
+
 
 class Gerenciar_PadraoView(ctk.CTkFrame):
 
@@ -19,7 +21,7 @@ class Gerenciar_PadraoView(ctk.CTkFrame):
         self.combo_principal = padrao_view
 
         icone_gear = ctk.CTkImage(
-            light_image=Image.open("imagens/icones/gear.png"),
+            light_image=Image.open(resource_path("imagens", "icones", "gear.png")),
             size=(20, 20)
         )
 
