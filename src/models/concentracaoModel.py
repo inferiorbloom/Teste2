@@ -155,7 +155,7 @@ class ConcentracaoModel:
             if elemento == "Ar":
                 area_ar_padrao = area
                 break
-        print("Área de Ar no padrão:", area_ar_padrao)
+        #print("Área de Ar no padrão:", area_ar_padrao)
         # dicionario para guardar os fatores de normalização
         fatores_normalizacao = {}
         areas_normalizadas = {}
@@ -217,7 +217,7 @@ class ConcentracaoModel:
         #print("área de normalização com chave:", area_padrao[chave])
         #print("print no concentracaoModel")
         #print("Erros dos padrões:", area_padrao, "------",erro_padrao)
-        print("Fatores:", fatores_normalizacao)
+        #print("Fatores:", fatores_normalizacao)
         return [concentracoes, areas_normalizadas, fatores_normalizacao, erros_normalizados, area_padrao, erro_padrao]
 
 

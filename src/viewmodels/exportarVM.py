@@ -1,5 +1,6 @@
 from views.exportarView import ExportarView
 from models.exportarModel import ExportarModel
+from models.configModel import carregar_ultimo_diretorio, salvar_ultimo_diretorio
 from tkinter import filedialog
 
 class ExportarVM:
@@ -21,6 +22,7 @@ class ExportarVM:
 
     def exporta_excel(self):
         # Abre a caixa de diálogo para o usuário escolher onde salvar o arquivo Excel
+        initialdir = carregar_ultimo_diretorio() or ""
         caminho_arquivo = filedialog.asksaveasfilename(
             title="Salvar planilha Excel",
             defaultextension=".xlsx",
@@ -28,14 +30,15 @@ class ExportarVM:
                 ("Planilhas Excel", "*.xlsx"),
                 ("Todos os arquivos", "*.*")
             ],
-            initialfile="amostras.xlsx"
-        )   
+            initialfile="amostras.xlsx",
+            initialdir=initialdir,
+        )
 
         # usuário cancelou
         if not caminho_arquivo:
             return
-        
-        
+
+        salvar_ultimo_diretorio(caminho_arquivo)
         
         # Obtem as variáveis atualizadas no fluxo principal
         arquivo_padrao = self.variaveis.lista_arquivo_padrao

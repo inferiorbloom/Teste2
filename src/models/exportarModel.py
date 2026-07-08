@@ -1,67 +1,86 @@
+from importlib.resources import path
+
 import pandas as pd
 import os
 import customtkinter as ctk
-import math
-import numpy as np
-from collections import Counter
+
+from resource_utils import ensure_directory, user_data_path
+
+from models.arredondamentoModel import ArredondamentoModel
+from models.abaDadosModel import AbaDadosModel
+from models.abaResultadosModel import AbaResultadosModel, montar_titulo_coluna
+from models.abaConcentracoesModel import AbaConcentracoesModel
+
 
 class ExportarModel:
 
-    def formatar_valor_erro(self, valor, erro):
-        if erro is None or erro == 0:
-            return valor, erro
-        
-        ordem = math.floor(math.log10(abs(erro)))
-        sig = 2
-        if ordem < 0:
-            casas = -(ordem - (sig - 1))
-            #print("DEBUG ORDEM:", ordem, "CASAS DECIMAIS:", casas)
-            erro_arred = np.round(erro, casas)
-            valor_arred = np.round(valor, casas)
-        elif ordem >= 0:
-            
-            erro_arred = np.round(erro)
-            valor_arred = np.round(valor)
+    def __init__(self):
+        self.arredondamento = ArredondamentoModel()
+        self.aba_dados = AbaDadosModel()
+        self.aba_resultados = AbaResultadosModel()
+        self.aba_concentracoes = AbaConcentracoesModel()
 
-        
-        return valor_arred, erro_arred
+    def _normalizar_valores_para_excel(self, df):
+        """Converte valores que parecem numéricos para tipos numéricos reais antes de gravar no Excel."""
+        if df is None or df.empty:
+            return df
 
+        df_export = df.copy()
 
-    def formatar_ld(self, ld):
-        if ld is None or ld == "":
-            return ld
+        for coluna in df_export.columns:
+            serie = df_export[coluna]
 
-        try:
-            ld = float(ld)
-        except:
-            return ld
+            if not pd.api.types.is_object_dtype(serie) and not pd.api.types.is_string_dtype(serie):
+                continue
 
-        if ld == 0:
-            return 0
+            valores_normalizados = []
+            for valor in serie:
+                if pd.isna(valor):
+                    valores_normalizados.append(valor)
+                    continue
 
-        ordem = math.floor(math.log10(abs(ld)))
-        primeira = ld / (10 ** ordem)
+                if valor in ["", None]:
+                    valores_normalizados.append(valor)
+                    continue
 
-        # mesma lógica do erro
-        if primeira < 3:
-            sig = 2
-        else:
-            sig = 1
+                if isinstance(valor, str):
+                    texto = valor.strip()
+                    if texto in ["-", "--", "—", "NaN", "nan", "None", "none"]:
+                        valores_normalizados.append(valor)
+                        continue
 
-        casas = -(ordem - (sig - 1))
+                    try:
+                        valores_normalizados.append(float(texto))
+                    except ValueError:
+                        valores_normalizados.append(valor)
+                else:
+                    valores_normalizados.append(valor)
 
-        return round(ld, casas)
+            df_export[coluna] = valores_normalizados
 
-    def montar_titulo_coluna(self, elemento, energia, unidade, possui_duplicata):
-        if possui_duplicata:
-            if unidade:
-                return f"{elemento} ({energia:.3f} keV, {unidade})"
-            return f"{elemento} ({energia:.3f} keV)"
+        return df_export
 
-        if unidade:
-            return f"{elemento} ({unidade})"
+    def _buscar_ld_para_elemento(self, ld_resultado, nome_padrao, elemento):
+        if not ld_resultado:
+            return None
 
-        return elemento
+        if not isinstance(ld_resultado, dict):
+            return None
+
+        valor_padrao = ld_resultado.get(nome_padrao, {}).get(elemento, "")
+        if valor_padrao not in ["", None]:
+            return valor_padrao
+
+        for chave, dados in ld_resultado.items():
+            if chave == nome_padrao:
+                continue
+
+            if isinstance(dados, dict):
+                valor_fallback = dados.get(elemento, "")
+                if valor_fallback not in ["", None]:
+                    return valor_fallback
+
+        return None
 
     def exportar_para_excel(
         self,
@@ -86,313 +105,54 @@ class ExportarModel:
         unidade_padrao = unidade_padrao or {}
         arquivo_padrao = arquivo_padrao or ""
         nome_padrao = os.path.basename(arquivo_padrao).replace(".txt", "")
+        print("[DEBUG] nome_padrao para exportação:", nome_padrao)
+        print("[DEBUG] chaves_ld_resultado:", list(ld_resultado.keys()) if ld_resultado else [])
 
-        #print("-------------------------")
-        #print(arquivo_padrao)
-        #print("-------------------------")
-        #print(nome_padrao)
-        #print("-------------------------")
-        #print(ld_resultado)
+        # --- Aba "Dados" ---
+        df_dados = self.aba_dados.montar(
+            arquivos, areas_normalizadas, erros_normalizados, fatores_normalizacao
+        )
 
+        # --- Aba "Resultados" ---
+        df_analise, elementos_ordenados, contagem_elementos = self.aba_resultados.montar(
+            concentracoes, erros_propagados, unidade_padrao
+        )
 
-        elementos = {
-            13: "Al",
-            14: "Si",
-            15: "P",
-            16: "S",
-            17: "Cl",
-            18: "Ar",
-            19: "K",
-            20: "Ca",
-            21: "Sc",
-            22: "Ti",
-            23: "V",
-            24: "Cr",
-            25: "Mn",
-            26: "Fe",
-            27: "Co",
-            28: "Ni",
-            29: "Cu",
-            30: "Zn",
-            31: "Ga",
-            32: "Ge",
-            33: "As",
-            34: "Se",
-            35: "Br",
-            36: "Kr",
-            37: "Rb",
-            38: "Sr",
-            39: "Y",
-            40: "Zr",
-            41: "Nb",
-            42: "Mo",
-            43: "Tc",
-            44: "Ru",
-            45: "Rh",
-            46: "Pd",
-            47: "Ag",
-            48: "Cd",
-            49: "In",
-            50: "Sn",
-            51: "Sb",
-            52: "Te",
-            53: "I",
-            54: "Xe",
-            55: "Cs",
-            56: "Ba",
-            57: "La",
-            58: "Ce",
-            59: "Pr",
-            60: "Nd",
-            61: "Pm",
-            62: "Sm",
-            63: "Eu",
-            64: "Gd",
-            65: "Tb",
-            66: "Dy",
-            67: "Ho",
-            68: "Er",
-            69: "Tm",
-            70: "Yb",
-            71: "Lu",
-            72: "Hf",
-            73: "Ta",
-            74: "W",
-            75: "Re",
-            76: "Os",
-            77: "Ir",
-            78: "Pt",
-            79: "Au",
-            80: "Hg",
-            81: "Tl",
-            82: "Pb",
-            83: "Bi",
-            84: "Po",
-            85: "At",
-            86: "Rn",
-            87: "Fr",
-            88: "Ra",
-            89: "Ac",
-            90: "Th",
-            91: "Pa",
-            92: "U",
-            93: "Np",
-            94: "Pu",
-        }
+        # --- Aba "Concentrações" ---
+        df_concentracoes = self.aba_concentracoes.montar(df_analise)
 
-        # --- Exportação dos dados originais (sem mudar nada) ---
-        todos_dados = []
+        #print("\n========== DF_CONCENTRACOES ==========")
+        #print(df_concentracoes.to_string())
 
-        for arquivo in arquivos:
-            nome_amostra = os.path.basename(arquivo).replace(".txt", "")
-            fator = fatores_normalizacao.get(nome_amostra, "")
-            fator_formatado = ""
-            if isinstance(fator, (int, float)):
-                fator_formatado = round(fator, 2)
-            else:
-                try:
-                    fator_formatado = round(float(fator), 2)
-                except Exception:
-                    fator_formatado = fator
+        #df_analise.to_excel("DEBUG_RESULTADOS.xlsx")
+        #df_concentracoes.to_excel("DEBUG_CONCENTRACOES.xlsx")
 
-            todos_dados.append([nome_amostra, "", "", "", "", "", "", "Normalização:", fator_formatado])
-            todos_dados.append([
-                "Elemento",
-                "Z",
-                "Energia (keV)",
-                "Área (CPS)",
-                "Erro (CPS)",
-                "Erro (%)",
-                "Área Normalizada (CPS)",
-                "Erro Normalizado (CPS)"
-            ])
-
-            with open(arquivo, "r", encoding="utf-8") as f:
-                linhas = f.readlines()[5:]
-
-                for linha in linhas:
-                    valores = [v.strip() for v in linha.split(",")]
-                    if len(valores) > 1:
-                        try:
-                            z = int(valores[0])
-                            nome_elemento = elementos.get(z, "")
-                        except Exception:
-                            nome_elemento = ""
-
-                        energia = float(valores[1]) if valores[1] else 0
-                        area = float(valores[2]) if valores[2] else 0
-                        erro = float(valores[3]) if valores[3] else 0
-
-                        erro_percent = (erro / area) * 100 if area != 0 else 0
-                        chave = (nome_elemento, round(energia, 3))
-
-
-                        area_norm = areas_normalizadas.get(nome_amostra, {}).get(chave, "")
-                        erro_norm = erros_normalizados.get(nome_amostra, {}).get(chave, "")
-
-                        if area_norm != "":
-                            try:
-                                area_norm = round(float(area_norm), 0)
-                            except Exception:
-                                pass
-
-                        if erro_norm != "":
-                            try:
-                                erro_norm = round(float(erro_norm), 0)
-                            except Exception:
-                                pass
-
-                        todos_dados.append([
-                            nome_elemento,
-                            z,
-                            energia,
-                            area,
-                            erro,
-                            round(erro_percent, 2),
-                            area_norm,
-                            erro_norm,
-                        ])
-
-            todos_dados.append(["", "", "", "", "", "", "", ""])
-
-        df_dados = pd.DataFrame(todos_dados)
-
-
-        # --- Exportação da análise (Resultados) ---
-        analise = {}
-        elementos_encontrados = set()
-
-        for bloco in concentracoes.values():
-            if isinstance(bloco, dict):
-                for nome_amostra, valores in bloco.items():
-                    analise.setdefault(nome_amostra, {})
-                    for elemento, valor in valores.items():
-                        elementos_encontrados.add(elemento)
-                        analise[nome_amostra].setdefault(elemento, {})
-                        analise[nome_amostra][elemento]["C"] = valor
-
-        for bloco in erros_propagados.values():
-            if isinstance(bloco, dict):
-                for nome_amostra, amostra_valores in bloco.items():
-                    analise.setdefault(nome_amostra, {})
-                    for elemento, erro in amostra_valores.items():
-                        elementos_encontrados.add(elemento)
-                        analise[nome_amostra].setdefault(elemento, {})
-                        analise[nome_amostra][elemento]["Erro"] = erro
-
-        if analise:
-            elementos_ordenados = sorted(elementos_encontrados, key=lambda x: (x[0], x[1]))  # ordena por símbolo e energia)
-            contagem_elementos = Counter(elemento for elemento, energia in elementos_ordenados)
-            
-            colunas = []
-            for elemento, energia in elementos_ordenados:
-                unidade = unidade_padrao.get(elemento, "")
-                possui_duplicata = contagem_elementos[elemento] > 1
-                nome_coluna = self.montar_titulo_coluna(elemento, energia, unidade, possui_duplicata)
-
-                colunas.append((nome_coluna, "C"))
-                colunas.append((nome_coluna, "Erro"))
-
-            linhas = {}
-            for nome_amostra, elementos in analise.items():
-                linha = {}
-                for elemento in elementos_ordenados:
-                    unidade = unidade_padrao.get(elemento[0], "")
-                    possui_duplicata = contagem_elementos[elemento[0]] > 1
-                    nome_coluna = self.montar_titulo_coluna(elemento[0], elemento[1], unidade, possui_duplicata)
-                                                      
-                    c_col = "C"
-                    e_col = "Erro"
-                    valor = elementos.get(elemento, {}).get("C", "")
-                    erro = elementos.get(elemento, {}).get("Erro", "")
-
-                    if valor != "":
-                        try:
-                            #print("DEBUG VALOR BRUTO:", valor, "ERRO BRUTO:", erro)
-                            valor_num = float(valor)
-                            erro_existe = erro not in ["", None]
-
-                            if erro_existe:
-                                erro_num = float(erro)
-                            else:
-                                erro_num = None
-
-                            # 🔥 Se não tem erro ou erro = 0 → NÃO arredonda
-                            if erro_existe:
-                                valor_fmt, erro_fmt = self.formatar_valor_erro(valor_num, erro_num)
-                                if isinstance(valor_fmt, (int, float)) and isinstance(erro_fmt, (int, float)):
-
-                                    if erro_fmt != 0:
-                                        ordem = math.floor(math.log10(abs(erro_fmt)))
-                                        primeira = erro_fmt / (10 ** ordem)
-                                        sig = 2 if primeira < 3 else 1
-                                        casas = max(0, -(ordem - (sig - 1)))
-                                    else:
-                                        casas = 0
-
-                                    valor_str = f"{valor_fmt:.{casas}f}"
-                                    erro_str = f"{erro_fmt:.{casas}f}"
-
-                                    #nome_coluna = f"{elemento[0]} ({elemento[1]:.3f} keV)"
-
-                                    linha[(nome_coluna, c_col)] = valor_str
-                                    linha[(nome_coluna, e_col)] = erro_str
-
-                                else:
-                                    linha[(nome_coluna, c_col)] = valor_fmt
-                                    linha[(nome_coluna, e_col)] = erro_fmt
-                            else:
-                                valor_fmt = round(valor_num)  # 👈 arredondamento simples
-                                linha[(nome_coluna, c_col)] = valor_fmt
-                                linha[(nome_coluna, e_col)] = ""
-
-                        except Exception:
-                            linha[(nome_coluna, c_col)] = valor
-                            linha[(nome_coluna, e_col)] = erro
-
-                linhas[nome_amostra] = linha
-
-            df_analise = pd.DataFrame.from_dict(linhas, orient="index")
-            df_analise = df_analise.reindex(columns=pd.MultiIndex.from_tuples(colunas))
-            df_analise.index = list(linhas.keys())
-
-            df_analise = df_analise.replace(r'^\s*$', '-', regex=True).fillna('-')
-
-        else:
-            df_analise = pd.DataFrame()
-        
-        # --- Nova aba: só concentrações (já formatadas) ---
-
-        df_concentracoes = df_analise.xs("C", axis=1, level=1)
-        df_concentracoes.columns.name = None
-
-        df_concentracoes = df_concentracoes.replace(r'^\s*$', '-', regex=True).fillna('-')
-        
-        # Se o usuário não escolheu um local para salvar, salva na pasta do programa
+        # Se o usuário não escolheu um local para salvar, salva em um diretório gravável pelo usuário
         if not caminho_arquivo:
-            os.makedirs("tabela-excel", exist_ok=True)
-            caminho_arquivo = os.path.join("tabela-excel", "amostras.xlsx")
+            pasta_saida = ensure_directory(user_data_path("exports"))
+            caminho_arquivo = os.path.join(pasta_saida, "amostras.xlsx")
 
         def _salvar_excel(path):
+
+            df_dados_excel = self._normalizar_valores_para_excel(df_dados)
+            df_concentracoes_excel = self._normalizar_valores_para_excel(df_concentracoes)
+            df_analise_excel = self._normalizar_valores_para_excel(df_analise)
+
             with pd.ExcelWriter(
                 path,
                 engine="xlsxwriter",
-                engine_kwargs={
-                    "options": {
-                        "strings_to_numbers": True
-                    }
-                }
             ) as writer:
-                df_dados.to_excel(writer, sheet_name="Dados", index=False, header=False)
 
-                df_concentracoes.to_excel(
+                df_dados_excel.to_excel(writer, sheet_name="Dados", index=False, header=False)
+
+                df_concentracoes_excel.to_excel(
                     writer,
                     sheet_name="Concentrações",
                     index=True,
                     index_label="Amostra"
                 )
 
-                df_analise.to_excel(
+                df_analise_excel.to_excel(
                     writer,
                     sheet_name="Resultados",
                     index=True,
@@ -413,12 +173,11 @@ class ExportarModel:
 
                 col = 1
 
-
                 for elemento, energia in elementos_ordenados:
 
                     unidade = unidade_padrao.get(elemento, "")
                     possui_duplicata = contagem_elementos[elemento] > 1
-                    titulo = self.montar_titulo_coluna(elemento, energia, unidade, possui_duplicata)
+                    titulo = montar_titulo_coluna(elemento, energia, unidade, possui_duplicata)
 
                     # Linha 0 -> nome do elemento + unidade
                     worksheet.merge_range(
@@ -433,14 +192,10 @@ class ExportarModel:
                     ld = "-"
 
                     if ld_resultado:
-                        ld_bruto = (
-                            ld_resultado
-                            .get(nome_padrao, {})
-                            .get(elemento, "")
-                        )
+                        ld_bruto = self._buscar_ld_para_elemento(ld_resultado, nome_padrao, elemento)
 
                         if ld_bruto not in ["", None]:
-                            ld = self.formatar_ld(ld_bruto)
+                            ld = self.arredondamento.formatar_ld(ld_bruto)
 
                     # Linha 1 -> LD
                     worksheet.merge_range(
@@ -462,7 +217,8 @@ class ExportarModel:
         except PermissionError:
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            caminho_arquivo = os.path.join("tabela-excel", f"amostras_{timestamp}.xlsx")
+            pasta_saida = ensure_directory(user_data_path("exports"))
+            caminho_arquivo = os.path.join(pasta_saida, f"amostras_{timestamp}.xlsx")
             _salvar_excel(caminho_arquivo)
 
         print("Exportacao concluida!")
