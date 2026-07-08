@@ -1,4 +1,5 @@
 from collections import Counter
+import numpy as np
 import pandas as pd
 from models.elementosQuimicos import z_do_elemento
 from models.arredondamentoModel import ArredondamentoModel
@@ -80,9 +81,9 @@ class AbaResultadosModel:
             colunas.append((nome_coluna, "C"))
             colunas.append((nome_coluna, "Erro"))
 
-        linhas = {}
+        linhas = []
         for nome_amostra, elementos in analise.items():
-            linha = {}
+            linha = {coluna: np.nan for coluna in colunas}
             for elemento in elementos_ordenados:
                 unidade = unidade_padrao.get(elemento[0], "")
                 possui_duplicata = contagem_elementos[elemento[0]] > 1
@@ -94,25 +95,26 @@ class AbaResultadosModel:
                 erro = elementos.get(elemento, {}).get("Erro", "")
 
                 if valor != "":
-                    valor_final, erro_final = self.arredondamento.formatar_par(valor, erro, elemento[0])
-                    linha[(nome_coluna, c_col)] = valor_final
-                    linha[(nome_coluna, e_col)] = erro_final
+                    valor_final, erro_final, _ = self.arredondamento.formatar_resultado(valor, erro, elemento[0])
+                    linha[(nome_coluna, c_col)] = float(valor_final)
+                    linha[(nome_coluna, e_col)] = float(erro_final)
 
-            linhas[nome_amostra] = linha
+            linhas.append((nome_amostra, linha))
 
-        df_analise = pd.DataFrame.from_dict(linhas, orient="index")
-
+        df_analise = pd.DataFrame(
+            [linha for _, linha in linhas],
+            index=[nome_amostra for nome_amostra, _ in linhas],
+            columns=pd.MultiIndex.from_tuples(colunas),
+        )
 
         #print("df_analise")
         #print(df_analise)
         #print("Debug Aba resultados")
         #print(df_analise.loc[["060723ab","060723ac","060723ad"]])
 
-        df_analise = df_analise.reindex(columns=pd.MultiIndex.from_tuples(colunas))
-        df_analise.index = list(linhas.keys())
-
-        df_analise = df_analise.replace(r'^\s*$', '-', regex=True).fillna('-')
-
+        # Mantemos valores numéricos como float e deixamos a exportação decidir
+        # a representação visual para células vazias com '-'.
+        df_analise = df_analise.astype(object)
 
         #print("\n========== DF_ANALISE ==========")
         #print(df_analise.to_string())
