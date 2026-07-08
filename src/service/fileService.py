@@ -8,10 +8,7 @@ import re
 from collections import defaultdict
 
 from resource_utils import resource_path
-<<<<<<< HEAD
 from models.configModel import carregar_ultimo_diretorio, salvar_ultimo_diretorio
-=======
->>>>>>> origin
 
 
 class Service:
@@ -21,7 +18,6 @@ class Service:
 
         self.pasta_txt = resource_path("aquisicoes")
         self.pasta_pdf = resource_path("reports")
-<<<<<<< HEAD
 
     def _obter_initialdir(self):
         diretorio_salvo = carregar_ultimo_diretorio()
@@ -32,8 +28,6 @@ class Service:
     def _atualizar_diretorio(self, caminho):
         if caminho:
             salvar_ultimo_diretorio(caminho)
-=======
->>>>>>> origin
 
     # Função para selecionar arquivo padrão
     def selecionar_arquivo_padrao(self):

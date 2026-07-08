@@ -57,6 +57,11 @@ class ExportarVM:
         unidade_padrao = getattr(self.variaveis, "unidade_padrao", {}) or {}
         ld_resultado = getattr(self.variaveis, "resultado_limite", {}) or {}
 
+        c_padrao = getattr(self.variaveis, "c_padrao", None)
+        if c_padrao is not None:
+            self.exportar_model.arredondamento.atualizar_casas_padrao(c_padrao)
+            self.exportar_model.aba_resultados.arredondamento = self.exportar_model.arredondamento
+
         self.exporta_excel_var = self.exportar_model.exportar_para_excel(
             arquivos_amostras,
             concentracoes,

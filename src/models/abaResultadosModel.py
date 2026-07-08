@@ -94,7 +94,7 @@ class AbaResultadosModel:
                 erro = elementos.get(elemento, {}).get("Erro", "")
 
                 if valor != "":
-                    valor_final, erro_final = self.arredondamento.formatar_par(valor, erro)
+                    valor_final, erro_final = self.arredondamento.formatar_par(valor, erro, elemento[0])
                     linha[(nome_coluna, c_col)] = valor_final
                     linha[(nome_coluna, e_col)] = erro_final
 

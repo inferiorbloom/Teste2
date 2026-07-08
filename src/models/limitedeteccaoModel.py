@@ -1,6 +1,7 @@
 import math
 import os
 
+
 class LimiteDeteccaoModel:
 
     def _buscar_valor_por_elemento(self, dados, nome_amostra, elemento):
@@ -20,7 +21,32 @@ class LimiteDeteccaoModel:
 
         return None
 
-    def calcular_limite_deteccao(self, arquivos_fullReport, arquivo_padrao, c_padrao, areas_normalizadas, concentracoes):
+    def _buscar_valor_em_mapeamento(self, dados, elemento):
+        if not isinstance(dados, dict):
+            return None
+
+        if elemento in dados:
+            return dados[elemento]
+
+        for chave, valor in dados.items():
+            if isinstance(chave, tuple) and chave and chave[0] == elemento:
+                return valor
+
+        return None
+
+    def _buscar_concentracao_padrao(self, c_padrao, elemento):
+        if not isinstance(c_padrao, dict):
+            return None
+
+        elementos = c_padrao.get("elementos")
+        if isinstance(elementos, dict):
+            info = elementos.get(elemento)
+            if isinstance(info, dict):
+                return info.get("valor")
+
+        return c_padrao.get(elemento)
+
+    def calcular_limite_deteccao(self, arquivos_fullReport, arquivo_padrao, c_padrao, areas_normalizadas, concentracoes, area_padrao=None):
 
       #  print("Será que os arquivos estão chegando corretamente?")
       #  print(areas_normalizadas)
@@ -49,12 +75,30 @@ class LimiteDeteccaoModel:
 
             limites[arquivo] = limites_area
 
+        nome_padrao = os.path.splitext(os.path.basename(str(arquivo_padrao or "")))[0].strip()
+
         ld_resultado = {}
         for arquivo, elementos in limites.items():
             nome = os.path.basename(arquivo).replace(".pdf", "").strip()
             ld_resultado[nome] = {}
 
             for elemento, limite_area in elementos.items():
+                eh_padrao = (nome == nome_padrao)
+
+                if eh_padrao:
+                    area_padrao_valor = self._buscar_valor_em_mapeamento(area_padrao or {}, elemento)
+                    conc_padrao_valor = self._buscar_concentracao_padrao(c_padrao, elemento)
+
+                    if area_padrao_valor not in [None, "", 0] and conc_padrao_valor not in [None, "", 0]:
+                        try:
+                            conc_valor = float(conc_padrao_valor)
+                            area_padrao_valor = float(area_padrao_valor)
+                        except (TypeError, ValueError):
+                            pass
+                        else:
+                            ld = (conc_valor * limite_area) / area_padrao_valor
+                            ld_resultado[nome][elemento] = ld
+                            continue
 
                 area_norm = self._buscar_valor_por_elemento(areas_normalizadas, nome, elemento)
                 conc = self._buscar_valor_por_elemento(concentracoes, nome, elemento)
@@ -79,7 +123,11 @@ class LimiteDeteccaoModel:
         #print("Limites de detecção área:", limites[arquivo])
         #print(ld_resultado)
     
-       
+        #print("\n=========== LD_RESULTADO ===========")
+        #for amostra, dados in ld_resultado.items():
+            #print(amostra, "->", dados)
+
+
         return ld_resultado
 
 
