@@ -31,13 +31,21 @@ class LimiteDeteccaoVM:
         concentracoes = self.variaveis.resultados[0]
         areas_normalizadas = self.variaveis.resultados[1]
 
+        area_padrao = None
+        if self.variaveis.resultados and len(self.variaveis.resultados) > 4:
+            area_padrao = self.variaveis.resultados[4]
+
         self.resultado_limite = self.limitedeteccao_model.calcular_limite_deteccao(
             self.arquivos_fullReport,
             self.arquivo_padrao,
             self.c_padrao,
             areas_normalizadas,
-            concentracoes
+            concentracoes,
+            area_padrao=area_padrao,
         )
+
+        if hasattr(self, "limitedeteccao_model") and hasattr(self.limitedeteccao_model, "arredondamento"):
+            self.limitedeteccao_model.arredondamento.atualizar_casas_padrao(self.c_padrao)
 
         self.variaveis.resultado_limite = self.resultado_limite
 

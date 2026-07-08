@@ -137,6 +137,12 @@ class ConcentracaoVM:
         self.variaveis.lista_arquivos = self.arquivos_amostras
         self.variaveis.lista_arquivo_padrao = self.arquivo_padrao
         self.variaveis.c_padrao = self.c_padrao
+
+        from models.arredondamentoModel import ArredondamentoModel
+        self.arredondamento = ArredondamentoModel()
+        self.arredondamento.atualizar_casas_padrao(self.c_padrao)
+        self.export.exportar_model.arredondamento = self.arredondamento
+        self.export.exportar_model.aba_resultados.arredondamento = self.arredondamento
         self.variaveis.resultados = self.resultado
         self.variaveis.erros_concentracao = self.erros_concentracao
         self.variaveis.unidade_padrao = self.unidade_padrao

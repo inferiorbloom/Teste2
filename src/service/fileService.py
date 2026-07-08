@@ -8,6 +8,7 @@ import re
 from collections import defaultdict
 
 from resource_utils import resource_path
+from models.configModel import carregar_ultimo_diretorio, salvar_ultimo_diretorio
 
 
 class Service:
@@ -18,13 +19,24 @@ class Service:
         self.pasta_txt = resource_path("aquisicoes")
         self.pasta_pdf = resource_path("reports")
 
+    def _obter_initialdir(self):
+        diretorio_salvo = carregar_ultimo_diretorio()
+        if diretorio_salvo and os.path.isdir(diretorio_salvo):
+            return diretorio_salvo
+        return self.pasta_txt
+
+    def _atualizar_diretorio(self, caminho):
+        if caminho:
+            salvar_ultimo_diretorio(caminho)
+
     # Função para selecionar arquivo padrão
     def selecionar_arquivo_padrao(self):
         arquivo_padrao = askopenfilename(
-            initialdir=self.pasta_txt,
+            initialdir=self._obter_initialdir(),
             title="Selecione o arquivo.txt que deseja utilizar como PADRÃO!",
             filetypes=[("Arquivos de texto", "*.txt")],
         )
+        self._atualizar_diretorio(arquivo_padrao)
         texto_arquivo_padrao = ctk.CTkLabel(self.master, text="")
         texto_arquivo_padrao.configure(text=os.path.basename(arquivo_padrao))
         # arquivo = os.path.basename(arquivo_padrao)
@@ -33,10 +45,12 @@ class Service:
     # Função para selecionar arquivos das amostras
     def selecionar_arquivos_amostras(self):
         arquivos_amostras = askopenfilenames(
-            initialdir=self.pasta_txt,
+            initialdir=self._obter_initialdir(),
             title="Selecione os arquivos.txt que deseja utilizar como AMOSTRAS!",
             filetypes=[("Arquivos de texto", "*.txt")],
         )
+        if arquivos_amostras:
+            self._atualizar_diretorio(arquivos_amostras[-1])
         texto_arquivos_amostras = ctk.CTkLabel(self.master, text="")
         if arquivos_amostras:
             ultimo = os.path.basename(arquivos_amostras[-1])
@@ -51,9 +65,12 @@ class Service:
     def selecionar_arquivos_fullReport(self):
 
         fullreports = filedialog.askopenfilenames(
+            initialdir=self._obter_initialdir(),
             title="Selecione os FullReports",
             filetypes=[("FullReports", "*.pdf")]
         )
+        if fullreports:
+            self._atualizar_diretorio(fullreports[-1])
 
         resultados = {}
 
