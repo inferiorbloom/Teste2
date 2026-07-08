@@ -12,6 +12,8 @@ from models.abaResultadosModel import AbaResultadosModel, montar_titulo_coluna
 from models.abaConcentracoesModel import AbaConcentracoesModel
 
 
+from resource_utils import ensure_directory, user_data_path
+
 class ExportarModel:
 
     def __init__(self):
@@ -127,6 +129,182 @@ class ExportarModel:
         #df_analise.to_excel("DEBUG_RESULTADOS.xlsx")
         #df_concentracoes.to_excel("DEBUG_CONCENTRACOES.xlsx")
 
+<<<<<<< HEAD
+=======
+            todos_dados.append([nome_amostra, "", "", "", "", "", "", "Normalização:", fator_formatado])
+            todos_dados.append([
+                "Elemento",
+                "Z",
+                "Energia (keV)",
+                "Área (CPS)",
+                "Erro (CPS)",
+                "Erro (%)",
+                "Área Normalizada (CPS)",
+                "Erro Normalizado (CPS)"
+            ])
+
+            with open(arquivo, "r", encoding="utf-8") as f:
+                linhas = f.readlines()[5:]
+
+                for linha in linhas:
+                    valores = [v.strip() for v in linha.split(",")]
+                    if len(valores) > 1:
+                        try:
+                            z = int(valores[0])
+                            nome_elemento = elementos.get(z, "")
+                        except Exception:
+                            nome_elemento = ""
+
+                        energia = float(valores[1]) if valores[1] else 0
+                        area = float(valores[2]) if valores[2] else 0
+                        erro = float(valores[3]) if valores[3] else 0
+
+                        erro_percent = (erro / area) * 100 if area != 0 else 0
+                        chave = (nome_elemento, round(energia, 3))
+
+
+                        area_norm = areas_normalizadas.get(nome_amostra, {}).get(chave, "")
+                        erro_norm = erros_normalizados.get(nome_amostra, {}).get(chave, "")
+
+                        if area_norm != "":
+                            try:
+                                area_norm = round(float(area_norm), 0)
+                            except Exception:
+                                pass
+
+                        if erro_norm != "":
+                            try:
+                                erro_norm = round(float(erro_norm), 0)
+                            except Exception:
+                                pass
+
+                        todos_dados.append([
+                            nome_elemento,
+                            z,
+                            energia,
+                            area,
+                            erro,
+                            round(erro_percent, 2),
+                            area_norm,
+                            erro_norm,
+                        ])
+
+            todos_dados.append(["", "", "", "", "", "", "", ""])
+
+        df_dados = pd.DataFrame(todos_dados)
+
+
+        # --- Exportação da análise (Resultados) ---
+        analise = {}
+        elementos_encontrados = set()
+
+        for bloco in concentracoes.values():
+            if isinstance(bloco, dict):
+                for nome_amostra, valores in bloco.items():
+                    analise.setdefault(nome_amostra, {})
+                    for elemento, valor in valores.items():
+                        elementos_encontrados.add(elemento)
+                        analise[nome_amostra].setdefault(elemento, {})
+                        analise[nome_amostra][elemento]["C"] = valor
+
+        for bloco in erros_propagados.values():
+            if isinstance(bloco, dict):
+                for nome_amostra, amostra_valores in bloco.items():
+                    analise.setdefault(nome_amostra, {})
+                    for elemento, erro in amostra_valores.items():
+                        elementos_encontrados.add(elemento)
+                        analise[nome_amostra].setdefault(elemento, {})
+                        analise[nome_amostra][elemento]["Erro"] = erro
+
+        if analise:
+            elementos_ordenados = sorted(elementos_encontrados, key=lambda x: (x[0], x[1]))  # ordena por símbolo e energia)
+            contagem_elementos = Counter(elemento for elemento, energia in elementos_ordenados)
+            
+            colunas = []
+            for elemento, energia in elementos_ordenados:
+                unidade = unidade_padrao.get(elemento, "")
+                possui_duplicata = contagem_elementos[elemento] > 1
+                nome_coluna = self.montar_titulo_coluna(elemento, energia, unidade, possui_duplicata)
+
+                colunas.append((nome_coluna, "C"))
+                colunas.append((nome_coluna, "Erro"))
+
+            linhas = {}
+            for nome_amostra, elementos in analise.items():
+                linha = {}
+                for elemento in elementos_ordenados:
+                    unidade = unidade_padrao.get(elemento[0], "")
+                    possui_duplicata = contagem_elementos[elemento[0]] > 1
+                    nome_coluna = self.montar_titulo_coluna(elemento[0], elemento[1], unidade, possui_duplicata)
+                                                      
+                    c_col = "C"
+                    e_col = "Erro"
+                    valor = elementos.get(elemento, {}).get("C", "")
+                    erro = elementos.get(elemento, {}).get("Erro", "")
+
+                    if valor != "":
+                        try:
+                            #print("DEBUG VALOR BRUTO:", valor, "ERRO BRUTO:", erro)
+                            valor_num = float(valor)
+                            erro_existe = erro not in ["", None]
+
+                            if erro_existe:
+                                erro_num = float(erro)
+                            else:
+                                erro_num = None
+
+                            # 🔥 Se não tem erro ou erro = 0 → NÃO arredonda
+                            if erro_existe:
+                                valor_fmt, erro_fmt = self.formatar_valor_erro(valor_num, erro_num)
+                                if isinstance(valor_fmt, (int, float)) and isinstance(erro_fmt, (int, float)):
+
+                                    if erro_fmt != 0:
+                                        ordem = math.floor(math.log10(abs(erro_fmt)))
+                                        primeira = erro_fmt / (10 ** ordem)
+                                        sig = 2 if primeira < 3 else 1
+                                        casas = max(0, -(ordem - (sig - 1)))
+                                    else:
+                                        casas = 0
+
+                                    valor_str = f"{valor_fmt:.{casas}f}"
+                                    erro_str = f"{erro_fmt:.{casas}f}"
+
+                                    #nome_coluna = f"{elemento[0]} ({elemento[1]:.3f} keV)"
+
+                                    linha[(nome_coluna, c_col)] = valor_str
+                                    linha[(nome_coluna, e_col)] = erro_str
+
+                                else:
+                                    linha[(nome_coluna, c_col)] = valor_fmt
+                                    linha[(nome_coluna, e_col)] = erro_fmt
+                            else:
+                                valor_fmt = round(valor_num)  # 👈 arredondamento simples
+                                linha[(nome_coluna, c_col)] = valor_fmt
+                                linha[(nome_coluna, e_col)] = ""
+
+                        except Exception:
+                            linha[(nome_coluna, c_col)] = valor
+                            linha[(nome_coluna, e_col)] = erro
+
+                linhas[nome_amostra] = linha
+
+            df_analise = pd.DataFrame.from_dict(linhas, orient="index")
+            df_analise = df_analise.reindex(columns=pd.MultiIndex.from_tuples(colunas))
+            df_analise.index = list(linhas.keys())
+
+            df_analise = df_analise.replace(r'^\s*$', '-', regex=True).fillna('-')
+
+        else:
+            df_analise = pd.DataFrame()
+        
+        # --- Nova aba: só concentrações (já formatadas) ---
+
+        df_concentracoes = df_analise.xs("C", axis=1, level=1)
+        df_concentracoes.columns.name = None
+
+        df_concentracoes = df_concentracoes.replace(r'^\s*$', '-', regex=True).fillna('-')
+        
+>>>>>>> origin
         # Se o usuário não escolheu um local para salvar, salva em um diretório gravável pelo usuário
         if not caminho_arquivo:
             pasta_saida = ensure_directory(user_data_path("exports"))
