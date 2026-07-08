@@ -5,6 +5,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from models.exportarModel import ExportarModel
+from models.arredondamentoModel import ArredondamentoModel
 
 
 class ExportarModelTests(unittest.TestCase):
@@ -16,6 +17,14 @@ class ExportarModelTests(unittest.TestCase):
         }
 
         self.assertEqual(model._buscar_ld_para_elemento(ld_resultado, "290426ab.txt", "Fe"), 1.234)
+
+    def test_formatar_resultado_retorna_float(self):
+        model = ArredondamentoModel()
+        valor, erro, casas = model.formatar_resultado(20.0, 0.1, "Fe")
+
+        self.assertIsInstance(valor, float)
+        self.assertIsInstance(erro, float)
+        self.assertEqual(casas, 0)
 
 
 if __name__ == "__main__":

@@ -61,28 +61,26 @@ class ExportarModel:
         return df_export
 
     def _buscar_ld_para_elemento(self, ld_resultado, nome_padrao, elemento):
+        if not ld_resultado or not isinstance(ld_resultado, dict):
+            return None
+
+        nome_padrao_normalizado = os.path.basename(str(nome_padrao or "")).replace(".txt", "")
+
         print(f"\nBuscando {elemento}")
-        print("nome_padrao =", nome_padrao)
+        print("nome_padrao =", nome_padrao_normalizado)
 
         print("dados desse padrão:")
-        print(ld_resultado.get(nome_padrao))
+        print(ld_resultado.get(nome_padrao_normalizado))
 
-        valor_padrao = ld_resultado.get(nome_padrao, {}).get(elemento, "")
+        valor_padrao = ld_resultado.get(nome_padrao_normalizado, {}).get(elemento, "")
 
         print("valor encontrado =", valor_padrao)
         
-        if not ld_resultado:
-            return None
-
-        if not isinstance(ld_resultado, dict):
-            return None
-
-        valor_padrao = ld_resultado.get(nome_padrao, {}).get(elemento, "")
         if valor_padrao not in ["", None]:
             return valor_padrao
 
         for chave, dados in ld_resultado.items():
-            if chave == nome_padrao:
+            if chave == nome_padrao_normalizado:
                 continue
 
             if isinstance(dados, dict):
@@ -158,13 +156,14 @@ class ExportarModel:
                 engine="xlsxwriter",
             ) as writer:
 
-                df_dados_excel.to_excel(writer, sheet_name="Dados", index=False, header=False)
+                df_dados_excel.to_excel(writer, sheet_name="Dados", index=False, header=False, na_rep="-")
 
                 df_concentracoes_excel.to_excel(
                     writer,
                     sheet_name="Concentrações",
                     index=True,
-                    index_label="Amostra"
+                    index_label="Amostra",
+                    na_rep="-"
                 )
 
                 df_analise_excel.to_excel(
@@ -172,7 +171,8 @@ class ExportarModel:
                     sheet_name="Resultados",
                     index=True,
                     header=False,
-                    startrow=2
+                    startrow=2,
+                    na_rep="-"
                 )
 
                 worksheet = writer.sheets["Resultados"]

@@ -88,7 +88,7 @@ class ArredondamentoModel:
             return valor, erro, 0
 
         if erro_num is None:
-            return valor, erro, 0
+            return float(valor_num), erro, 0
 
         precisao_maxima = self._obter_precisao_maxima(elemento, precisao_padrao)
         casas_erro = self._calcular_casas_para_erro(erro_num, precisao_maxima)
@@ -96,7 +96,7 @@ class ArredondamentoModel:
         valor_fmt = round(valor_num, casas_erro)
         erro_fmt = round(erro_num, casas_erro)
 
-        return valor_fmt, erro_fmt, casas_erro
+        return float(valor_fmt), float(erro_fmt), casas_erro
 
     def formatar_valor_erro(self, valor, erro, elemento=None):
         valor_fmt, erro_fmt, _ = self.formatar_resultado(valor, erro, elemento)
@@ -116,7 +116,7 @@ class ArredondamentoModel:
             precisao_maxima = 0
 
         casas = max(0, int(precisao_maxima))
-        return round(ld_num, casas)
+        return float(round(ld_num, casas))
 
     def formatar_par(self, valor, erro, elemento=None):
         """Formata valor e erro usando o erro como base para a precisão."""
