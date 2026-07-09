@@ -1,5 +1,5 @@
 import math
-
+from decimal import Decimal, ROUND_HALF_UP
 
 class ArredondamentoModel:
     """Centraliza o arredondamento usado na exportação e nos resultados."""
@@ -7,6 +7,26 @@ class ArredondamentoModel:
     def __init__(self):
         self.casas_padrao = {}
 
+    #novo método de arredondamento que utiliza a biblioteca decimal para maior precisão
+    def _arredondar_normal(self, valor, casas):
+        """Aplica o arredondamento tradicional (onde 5 vai para cima) usando Decimal."""
+        if valor is None or valor == "":
+            return 0.0
+        
+        try:
+            # Garante que o número de casas seja um inteiro positivo
+            casas_alvo = max(0, int(casas))
+            multiplicador = Decimal('10') ** -casas_alvo
+            
+            # Convertemos para string para blindar contra a imprecisão binária de floats
+            num = Decimal(str(valor))
+            
+            # Força o arredondamento matemático tradicional (ROUND_HALF_UP)
+            return float(num.quantize(multiplicador, rounding=ROUND_HALF_UP))
+        except (TypeError, ValueError):
+            return float(valor)
+        
+        
     def _obter_casas_elemento(self, elemento):
         if not elemento:
             return 0
@@ -93,8 +113,8 @@ class ArredondamentoModel:
         precisao_maxima = self._obter_precisao_maxima(elemento, precisao_padrao)
         casas_erro = self._calcular_casas_para_erro(erro_num, precisao_maxima)
 
-        valor_fmt = round(valor_num, casas_erro)
-        erro_fmt = round(erro_num, casas_erro)
+        valor_fmt = self._arredondar_normal(valor_num, casas_erro)
+        erro_fmt = self._arredondar_normal(erro_num, casas_erro)
 
         return float(valor_fmt), float(erro_fmt), casas_erro
 
@@ -116,7 +136,10 @@ class ArredondamentoModel:
             precisao_maxima = 0
 
         casas = max(0, int(precisao_maxima))
-        return float(round(ld_num, casas))
+
+
+    # SUBSTITUÍDO: trocado o round() nativo pelo arredondamento tradicional
+        return self._arredondar_normal(ld_num, casas)
 
     def formatar_par(self, valor, erro, elemento=None):
         """Formata valor e erro usando o erro como base para a precisão."""

@@ -66,15 +66,15 @@ class ExportarModel:
 
         nome_padrao_normalizado = os.path.basename(str(nome_padrao or "")).replace(".txt", "")
 
-        print(f"\nBuscando {elemento}")
-        print("nome_padrao =", nome_padrao_normalizado)
+        #print(f"\nBuscando {elemento}")
+        #print("nome_padrao =", nome_padrao_normalizado)
 
-        print("dados desse padrão:")
-        print(ld_resultado.get(nome_padrao_normalizado))
+        #print("dados desse padrão:")
+        #print(ld_resultado.get(nome_padrao_normalizado))
 
         valor_padrao = ld_resultado.get(nome_padrao_normalizado, {}).get(elemento, "")
 
-        print("valor encontrado =", valor_padrao)
+        #print("valor encontrado =", valor_padrao)
         
         if valor_padrao not in ["", None]:
             return valor_padrao
